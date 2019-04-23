@@ -1,4 +1,4 @@
-# Smart media activity #
+# Smart Media #
 
 TODO Describe the plugin shortly here.
 

@@ -17,7 +17,7 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     mod_smartmedia
+ * @package     filter_smartmedia
  * @category    string
  * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,4 +25,4 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Smart media activity';
+$string['pluginname'] = 'Smart Media';
