@@ -26,3 +26,5 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Smart Media';
+
+$string['filtername'] = 'Smart media';
