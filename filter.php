@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @package    filter
  * @subpackage smartmedia
- * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class filter_smartmedia extends moodle_text_filter {
@@ -59,6 +59,22 @@ class filter_smartmedia extends moodle_text_filter {
         $mediamanager = core_media_manager::instance($page);
     }
 
+    private function get_media_types() {
+        return '\.mp4|\.webm|\.ogg';
+    }
+
+
+    private function replace_callback($matches) {
+        error_log($matches[0]);
+        error_log($matches[1]);
+        return $matches[0];
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see moodle_text_filter::filter()
+     */
     public function filter($text, array $options = array()) {
 
         // First do some rapid checks to see if we can process the text
@@ -69,27 +85,18 @@ class filter_smartmedia extends moodle_text_filter {
             return $text;
         }
 
-        if (stripos($text, '</a>') === false && stripos($text, '</video>') === false && stripos($text, '</audio>') === false) {
-            // Performance shortcut - if there are no </a>, </video> or </audio> tags, nothing can match.
+        if (stripos($text, '</a>') === false) {
+            // Performance shortcut - if there are no </a> tags, nothing can match.
             return $text;
         }
 
-        // Check SWF permissions.
-        $this->trusted = !empty($options['noclean']) or !empty($CFG->allowobjectembed);
+        // Match and attempt to replace link tags, for valid media types.
+        $mediatypes = $this->get_media_types();
+        $re = '~\<a\s[^>]*href\=[\"\'](.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
+        $newtext = preg_replace_callback($re, array($this, 'replace_callback'), $text);
 
-        // Looking for tags.
-        $matches = preg_split('/(<[^>]*>)/i', $text, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-
-        if (!$matches) {
-            return $text;
-        }
-
-        // Now that we have actually confirmed we have text we can actually act on. Do the processing.
-        error_log($text);
-
-
-        // Return the same string except processed by the above.
-        return $text;
+        // Return the string after it has been processed by the above.
+        return $newtext;
     }
 
 }
