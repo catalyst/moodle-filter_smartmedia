@@ -82,7 +82,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
 
-        error_log(print_r($proxy, true));
+        $this->assertEquals('/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4', $proxy['urls'][0]->get_path());
+        $this->assertEmpty($proxy['options']['width']);
+        $this->assertEmpty($proxy['options']['height']);
     }
 
     function test_get_embed_markup_simple() {
@@ -101,7 +103,8 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $urls, $options); // Get result of invoked method.
 
-        error_log(print_r($proxy, true));
+        $this->assertRegExp('~mediaplugin_videojs~', $proxy);
+        $this->assertRegExp('~</video>~', $proxy);
     }
 
 /**

@@ -150,6 +150,12 @@ class filter_smartmedia extends moodle_text_filter {
 
     }
 
+    /**
+     *
+     * @param unknown $urls
+     * @param unknown $options
+     * @return string
+     */
     private function get_embed_markup($urls, $options) {
         $name = $options['name'];
         $width = $options['width'];
@@ -158,6 +164,7 @@ class filter_smartmedia extends moodle_text_filter {
 
         $videojs = new \media_videojs_plugin();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
+        // TODO: Deal with fallback link.
 
         return $newtext;
 
@@ -180,8 +187,8 @@ class filter_smartmedia extends moodle_text_filter {
         // * Update cache with results.
         // * Replace text with the result
 
-
-        $replacedlink = $linktoreplace;
+        $elements = $this->get_smart_elements($linkhref);
+        $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
 
         return $replacedlink;
     }
