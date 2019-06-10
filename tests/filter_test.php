@@ -66,6 +66,44 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals(0, $proxy);
     }
 
+
+    /**
+     * Test method that gets smart media elements.
+     * The href in htis test has no smart media elements available.
+     */
+    function test_get_smart_elements_no_smart() {
+        $this->resetAfterTest(true);
+        $filterplugin = new filter_smartmedia(null, array());
+
+        $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'get_smart_elements');
+        $method->setAccessible(true); // Allow accessing of private method.
+        $proxy = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
+
+        error_log(print_r($proxy, true));
+    }
+
+    function test_get_embed_markup_simple() {
+        $this->resetAfterTest(true);
+        $filterplugin = new filter_smartmedia(null, array());
+
+        $urls = array(new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4'));
+        $options = array(
+            'width' => '',
+            'height' => '',
+            'name' => ''
+        );
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
+        $method->setAccessible(true); // Allow accessing of private method.
+        $proxy = $method->invoke($filterplugin, $urls, $options); // Get result of invoked method.
+
+        error_log(print_r($proxy, true));
+    }
+
 /**
      * There is no valid tags to replace.
      * Output next should be the same as input text.

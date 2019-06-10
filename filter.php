@@ -122,6 +122,47 @@ class filter_smartmedia extends moodle_text_filter {
         return '\.mp4|\.webm|\.ogg';
     }
 
+    /**
+     * Given a href to a media file get the corresponding
+     * smart media elements.
+     *
+     * @param string $linkhref The href to the source file.
+     * @return array $elements The smart media elements to embed.
+     */
+    private function get_smart_elements($linkhref) {
+        $urls = array();
+        $options = array();
+
+        // TODO: add smart element processing. For now just use original file.
+        $href = new \moodle_url($linkhref);
+
+        $urls[] = $href;
+        $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
+        $options['height'] = core_media_player_native::get_attribute($linkhref, 'height', PARAM_INT);
+        $options['name'] = core_media_player_native::get_attribute($linkhref, 'title');
+
+        $elements = array(
+            'urls' => $urls,
+            'options' => $options
+        );
+
+        return $elements;
+
+    }
+
+    private function get_embed_markup($urls, $options) {
+        $name = $options['name'];
+        $width = $options['width'];
+        $height = $options['height'];
+        $embedoptions = array();
+
+        $videojs = new \media_videojs_plugin();
+        $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
+
+        return $newtext;
+
+    }
+
 
     private function replace_callback($matches) {
         $linktoreplace = $matches[0]; // First element is the full matched link markup.
@@ -137,7 +178,7 @@ class filter_smartmedia extends moodle_text_filter {
         // * If processing hasn't completed use original link to render media player.
         // * If processing has completed use extra info to render media player.
         // * Update cache with results.
-
+        // * Replace text with the result
 
 
         $replacedlink = $linktoreplace;
