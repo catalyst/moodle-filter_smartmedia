@@ -32,6 +32,41 @@ require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the co
 class filter_smartmedia_testcase extends advanced_testcase {
 
     /**
+     * Test the video.js enabled method returns true.
+     */
+    function test_videojs_enabled_true() {
+        $this->resetAfterTest(true);
+
+        $filterplugin = new filter_smartmedia(null, array());
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
+        $method->setAccessible(true); // Allow accessing of private method.
+        $proxy = $method->invoke($filterplugin); // Get result of invoked method.
+
+        $this->assertEquals(1, $proxy);
+    }
+
+    /**
+     * Test the video.js enabled method returns false.
+     */
+    function test_videojs_enabled_false() {
+        $this->resetAfterTest(true);
+
+        // Only enable the HTML5 video player not video.js.
+        \core\plugininfo\media::set_enabled_plugins('html5video');
+
+        $filterplugin = new filter_smartmedia(null, array());
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
+        $method->setAccessible(true); // Allow accessing of private method.
+        $proxy = $method->invoke($filterplugin); // Get result of invoked method.
+
+        $this->assertEquals(0, $proxy);
+    }
+
+/**
      * There is no valid tags to replace.
      * Output next should be the same as input text.
      */

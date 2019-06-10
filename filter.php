@@ -23,7 +23,7 @@
  *
  * @package    filter
  * @subpackage smartmedia
- * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>
+ * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>V
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -38,8 +38,34 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class filter_smartmedia extends moodle_text_filter {
-    /** @var bool True if currently filtering trusted text */
-    private $trusted;
+
+    /**
+     * Video.js plugin enabled status not set.
+     *
+     * @var integer
+     */
+    const VIDEOJS_ENABLED_NOT_SET = -1;
+
+    /**
+     * Video.js plugin enabled.
+     *
+     * @var integer
+     */
+    const VIDEOJS_ENABLED = 1;
+
+    /**
+     * Video.js plugin not enabled.
+     *
+     * @var integer
+     */
+    const VIDEOJS_NOT_ENABLED = 0;
+
+    /**
+     * Enabled status of the video JS player.
+     *
+     * @var integer
+     */
+    private $videojsenabled = self::VIDEOJS_ENABLED_NOT_SET;
 
     /**
      * Setup page with filter requirements and other prepare stuff.
@@ -57,6 +83,33 @@ class filter_smartmedia extends moodle_text_filter {
 
         // Set up the media manager so that media plugins requiring JS are initialised.
         $mediamanager = core_media_manager::instance($page);
+    }
+
+
+    /**
+     * The smart media filter uses the Video.js player exclusively,
+     * this method check if it is enabled before continuing.
+     * Because status is called mutliple times per request,
+     * we determine the enabled status and then cache it,
+     * for the life of the request to improve performance,
+     *
+     * @return integer
+     */
+    private function videojs_enabled() {
+
+        if ($this->videojsenabled == self::VIDEOJS_ENABLED_NOT_SET) {
+            // if we haven't already determined Videjos plugin enabled status
+            // do so now.
+            $enabledplayes = \core\plugininfo\media::get_enabled_plugins();
+            if (in_array('videojs', $enabledplayes) && class_exists('media_videojs_plugin')){
+                $this->videojsenabled = self::VIDEOJS_ENABLED;
+            } else {
+                $this->videojsenabled = self::VIDEOJS_NOT_ENABLED;
+            }
+
+        }
+
+        return $this->videojsenabled;
     }
 
     /**
@@ -82,7 +135,7 @@ class filter_smartmedia extends moodle_text_filter {
         // * Break link into component parts (which should map to moodle file table and see,
         // what the processing status is.
         // * If processing hasn't completed use original link to render media player.
-        // * If processing has completed use extra infor to render media player.
+        // * If processing has completed use extra info to render media player.
         // * Update cache with results.
 
 
@@ -102,6 +155,12 @@ class filter_smartmedia extends moodle_text_filter {
         // First do some rapid checks to see if we can process the text
         // we've been given. If not then exit early.
 
+        // The smart media filter uses the Video.js player exclusively,
+        // so check if it is enabled before continuing.
+        if (!$this->videojs_enabled()) {
+            return $text;
+        }
+
         if (!is_string($text) or empty($text)) {
             // non string data can not be filtered anyway
             return $text;
@@ -112,9 +171,9 @@ class filter_smartmedia extends moodle_text_filter {
             return $text;
         }
 
-        // Match and attempt to replace link tags, for valid media types.
+        // Next match and attempt to replace link tags, for valid media types.
         // We are only processing files for Moodle activities and resources,
-        // not valid media types that are delivered external to Moodle.
+        // not valid media types that are delivered externally to Moodle.
         $mediatypes = $this->get_media_types();
         $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
         $newtext = preg_replace_callback($re, array($this, 'replace_callback'), $text);
