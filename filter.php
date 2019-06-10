@@ -59,15 +59,37 @@ class filter_smartmedia extends moodle_text_filter {
         $mediamanager = core_media_manager::instance($page);
     }
 
+    /**
+     * Get he media container types that are supported by this filter.
+     *
+     * @return string
+     */
     private function get_media_types() {
+        // TODO: Make this defined in config with some sensible defaults.
         return '\.mp4|\.webm|\.ogg';
     }
 
 
     private function replace_callback($matches) {
-        error_log($matches[0]);
-        error_log($matches[1]);
-        return $matches[0];
+        $linktoreplace = $matches[0]; // First element is the full matched link markup.
+        $linkhref = $matches[1]; // Second element is the href of the link.
+
+        // First check link in filter cache to see if there is a cached replace.
+        // TODO: link lookup caching.
+
+        // If there isn't a cached value, process the link to see if we have smart content for it.
+        // Rough steps:
+        // * Break link into component parts (which should map to moodle file table and see,
+        // what the processing status is.
+        // * If processing hasn't completed use original link to render media player.
+        // * If processing has completed use extra infor to render media player.
+        // * Update cache with results.
+
+
+
+        $replacedlink = $linktoreplace;
+
+        return $replacedlink;
     }
 
     /**
@@ -91,8 +113,10 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         // Match and attempt to replace link tags, for valid media types.
+        // We are only processing files for Moodle activities and resources,
+        // not valid media types that are delivered external to Moodle.
         $mediatypes = $this->get_media_types();
-        $re = '~\<a\s[^>]*href\=[\"\'](.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
+        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
         $newtext = preg_replace_callback($re, array($this, 'replace_callback'), $text);
 
         // Return the string after it has been processed by the above.

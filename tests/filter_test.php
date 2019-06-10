@@ -52,11 +52,13 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * A link tag was matched in the source text,
      * but the file type isn't one we can process.
      */
-    function test_filter_replace_callback_no_match() {
+    function test_filter_replace_callback() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
-        $match = array('<a href="#">Some test data</a>', '#');
+        $match = array(
+            '<a href="http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4">SampleVideo1mb.mp4</a>',
+            'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4');
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'replace_callback');
