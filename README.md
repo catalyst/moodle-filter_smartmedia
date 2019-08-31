@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/catalyst/moodle-filter_smartmedia.svg?branch=master)](https://travis-ci.org/catalyst/moodle-filter_smartmedia)
 
-#Smart Media Filter #
+# Smart Media Filter #
 
 Smart media aims to enhance Moodle's processing and delivery of multimedia while simplifying the process of managing multimedia for teachers and students.
 
