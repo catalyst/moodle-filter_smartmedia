@@ -28,3 +28,4 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Smart Media';
 
 $string['filtername'] = 'Smart media';
+$string['privacy:metadata'] = 'The Smart media plugin does not store any personal data.';
