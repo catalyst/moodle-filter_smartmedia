@@ -151,12 +151,14 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
+     * Given an array of Moodle URLs and an array of options,
+     * return the VideoJS markup.
      *
-     * @param unknown $urls
-     * @param unknown $options
-     * @return string
+     * @param array $urls Source file Moodle URLS.
+     * @param array $options Options for the player.
+     * @return string $newtext Rendered VideoJS markup.
      */
-    private function get_embed_markup($urls, $options) {
+    private function get_embed_markup($urls, $options) : string  {
         $name = $options['name'];
         $width = $options['width'];
         $height = $options['height'];
@@ -170,25 +172,24 @@ class filter_smartmedia extends moodle_text_filter {
 
     }
 
+    /**
+     * Given a matched link check if there is smartmedia available,
+     * and return updated link if there is.
+     *
+     * @param array $matches An array of link matches.
+     * @return string
+     */
+    private function replace_callback(array $matches) : string {
 
-    private function replace_callback($matches) {
-        $linktoreplace = $matches[0]; // First element is the full matched link markup.
         $linkhref = $matches[1]; // Second element is the href of the link.
+        $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
 
-        // First check link in filter cache to see if there is a cached replace.
-        // TODO: link lookup caching.
-
-        // If there isn't a cached value, process the link to see if we have smart content for it.
-        // Rough steps:
-        // * Break link into component parts (which should map to moodle file table and see,
-        // what the processing status is.
-        // * If processing hasn't completed use original link to render media player.
-        // * If processing has completed use extra info to render media player.
-        // * Update cache with results.
-        // * Replace text with the result
-
-        $elements = $this->get_smart_elements($linkhref);
-        $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
+        if(!empty($elements)) {
+            $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
+        } else {
+            // If no smartmedia found just return content unchanged and give other filters a chance.
+            $replacedlink = $matches[0]; // First element is the full matched link markup.
+        }
 
         return $replacedlink;
     }
