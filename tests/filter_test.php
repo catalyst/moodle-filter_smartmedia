@@ -17,8 +17,7 @@
 /**
  * Unit test for the filter_smartmedia
  *
- * @package    filter
- * @subpackage smartmedia
+ * @package    filter_smartmedia
  * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,9 +25,15 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the code to test
+require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the code to test.
 
-
+/**
+ * Unit test for the filter_smartmedia
+ *
+ * @package    filter_smartmedia
+ * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class filter_smartmedia_testcase extends advanced_testcase {
 
     /**
@@ -120,7 +125,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertRegExp('~</video>~', $proxy);
     }
 
-/**
+    /**
      * There is no valid tags to replace.
      * Output next should be the same as input text.
      */
@@ -165,12 +170,10 @@ class filter_smartmedia_testcase extends advanced_testcase {
             .'</div>'
         );
 
-        //test for valid link
+        // Test for valid link.
         foreach ($validlinks as $text) {
-           // $filter = $filterplugin->filter($text);
+            $filter = $filterplugin->filter($text);
 
         }
-
-
     }
 }

@@ -21,8 +21,7 @@
  *  a smart media plugin that plays that media inline and uses AI/ML
  *  techniques to improve user experience.
  *
- * @package    filter
- * @subpackage smartmedia
+ * @package    filter_smartmedia
  * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>V
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,8 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Automatic smart media embedding filter class.
  *
- * @package    filter
- * @subpackage smartmedia
+ * @package    filter_smartmedia
  * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -139,10 +137,10 @@ class filter_smartmedia extends moodle_text_filter {
     private function videojs_enabled() {
 
         if ($this->videojsenabled == self::VIDEOJS_ENABLED_NOT_SET) {
-            // if we haven't already determined Videjos plugin enabled status
+            // If we haven't already determined Videjos plugin enabled status
             // do so now.
             $enabledplayes = \core\plugininfo\media::get_enabled_plugins();
-            if (in_array('videojs', $enabledplayes) && class_exists('media_videojs_plugin')){
+            if (in_array('videojs', $enabledplayes) && class_exists('media_videojs_plugin')) {
                 $this->videojsenabled = self::VIDEOJS_ENABLED;
             } else {
                 $this->videojsenabled = self::VIDEOJS_NOT_ENABLED;
@@ -200,7 +198,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param array $options Options for the player.
      * @return string $newtext Rendered VideoJS markup.
      */
-    private function get_embed_markup($urls, $options) : string  {
+    private function get_embed_markup($urls, $options) : string {
         $name = $options['name'];
         $width = $options['width'];
         $height = $options['height'];
@@ -226,7 +224,7 @@ class filter_smartmedia extends moodle_text_filter {
         $linkhref = $matches[1]; // Second element is the href of the link.
         $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
 
-        if(!empty($elements)) {
+        if (!empty($elements)) {
             $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
         } else {
             // If no smartmedia found just return content unchanged and give other filters a chance.
@@ -237,9 +235,11 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
+     * Apply the smart media filter to the text.
      *
-     * {@inheritDoc}
-     * @see moodle_text_filter::filter()
+     * @param string $text The text to filter.
+     * @param array $options Extra options.
+     * @return string $newtext The filtered Text.
      */
     public function filter($text, array $options = array()) {
 
@@ -253,7 +253,7 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!is_string($text) or empty($text)) {
-            // non string data can not be filtered anyway
+            // Non string data can not be filtered anyway.
             return $text;
         }
 
