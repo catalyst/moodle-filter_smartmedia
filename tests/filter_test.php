@@ -34,7 +34,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * Test the video.js enabled method returns true.
      */
-    function test_videojs_enabled_true() {
+    public function test_videojs_enabled_true() {
         $this->resetAfterTest(true);
 
         $filterplugin = new filter_smartmedia(null, array());
@@ -50,7 +50,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * Test the video.js enabled method returns false.
      */
-    function test_videojs_enabled_false() {
+    public function test_videojs_enabled_false() {
         $this->resetAfterTest(true);
 
         // Only enable the HTML5 video player not video.js.
@@ -66,12 +66,25 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals(0, $proxy);
     }
 
+    /**
+     * Test getting media types string.
+     */
+    public function test_get_media_types() {
+        $filterplugin = new filter_smartmedia(null, array());
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'get_media_types');
+        $method->setAccessible(true); // Allow accessing of private method.
+        $proxy = $method->invoke($filterplugin); // Get result of invoked method.
+
+        $this->assertStringContainsString('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
+    }
 
     /**
      * Test method that gets smart media elements.
      * The href in htis test has no smart media elements available.
      */
-    function test_get_smart_elements_no_smart() {
+    public function test_get_smart_elements_no_smart() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
@@ -87,7 +100,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEmpty($proxy['options']['height']);
     }
 
-    function test_get_embed_markup_simple() {
+    public function test_get_embed_markup_simple() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
@@ -111,7 +124,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * There is no valid tags to replace.
      * Output next should be the same as input text.
      */
-    function test_filter_smartmedia_filter_no_replace() {
+    public function test_filter_smartmedia_filter_no_replace() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
@@ -128,7 +141,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * A link tag was matched in the source text,
      * but the file type isn't one we can process.
      */
-    function test_filter_replace_callback() {
+    public function test_filter_replace_callback() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
@@ -142,7 +155,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $proxy = $method->invoke($filterplugin, $match); // Get result of invoked method.
     }
 
-    function test_filter_smartmedia_filter() {
+    public function test_filter_smartmedia_filter() {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 

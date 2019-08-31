@@ -68,6 +68,47 @@ class filter_smartmedia extends moodle_text_filter {
     private $videojsenabled = self::VIDEOJS_ENABLED_NOT_SET;
 
     /**
+     * Array of file container types accepted by the filter.
+     *
+     * @var array
+     */
+    private $mediatypes = array(
+        '.aac', // Type: audio/aac.
+        '.au', // Type: audio/au.
+        '.mp3', // Type: audio/mp3.
+        '.m4a', // Type: audio/mp4.
+        '.oga', // Type: audio/ogg.
+        '.ogg', // Type: audio/ogg.
+        '.wav', // Type: audio/wav.
+        '.aif', // Type: audio/x-aiff.
+        '.aiff', // Type: audio/x-aiff.
+        '.aifc', // Type: audio/x-aiff.
+        '.m3u', // Type: audio/x-mpegurl.
+        '.wma', // Type: audio/x-ms-wma.
+        '.ram', // Type: audio/x-pn-realaudio-plugin.
+        '.rm', // Type: audio/x-pn-realaudio-plugin.
+        '.rv', // Type: audio/x-pn-realaudio-plugin.
+        '.mp4', // Type: video/mp4.
+        '.m4v', // Type: video/mp4.
+        '.f4v', // Type: video/mp4.
+        '.mpeg', // Type: video/mpeg.
+        '.mpe', // Type: video/mpeg.
+        '.mpg', // Type: video/mpeg.
+        '.ogv', // Type: video/ogg.
+        '.qt', // Type: video/quicktime.
+        '.3gp', // Type: video/quicktime.
+        '.mov', // Type: video/quicktime.
+        '.webm', // Type: video/webm.
+        '.dv', // Type: video/x-dv.
+        '.dif', // Type: video/x-dv.
+        '.flv', // Type: video/x-flv.
+        '.asf', // Type: video/x-ms-asf.
+        '.avi', // Type: video/x-ms-wm.
+        '.wmv', // Type: video/x-ms-wmv.
+
+    );
+
+    /**
      * Setup page with filter requirements and other prepare stuff.
      *
      * @param moodle_page $page The page we are going to add requirements to.
@@ -113,13 +154,14 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
-     * Get he media container types that are supported by this filter.
+     * Get the media container types that are supported by this filter.
      *
-     * @return string
+     * @return string $typestring String of supported types.
      */
-    private function get_media_types() {
-        // TODO: Make this defined in config with some sensible defaults.
-        return '\.mp4|\.webm|\.ogg';
+    private function get_media_types() : string {
+        $typestring = '\\'. implode('|\\', $this->mediatypes);
+
+        return $typestring;
     }
 
     /**
