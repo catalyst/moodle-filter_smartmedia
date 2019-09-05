@@ -169,30 +169,32 @@ class filter_smartmedia extends moodle_text_filter {
      * @param string $linkhref The href to the source file.
      * @return array $elements The smart media elements to embed.
      */
-    private function get_smart_elements($linkhref) {
+    private function get_smart_elements(string $linkhref) : array {
         $urls = array();
         $options = array();
+        $elements = array();
         $moodleurl = new \moodle_url($linkhref);
 
         // Get smartmedia elements.
         $conversion = new \local_smartmedia\conversion();
         $smartmedia = $conversion->get_smart_media($moodleurl);
 
-        foreach ($smartmedia['media'] as $url) {
-            $urls[] = $url;
+        if (!empty($smartmedia['media'])) {
+            foreach ($smartmedia['media'] as $url) {
+                $urls[] = $url;
+            }
+
+            $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
+            $options['height'] = core_media_player_native::get_attribute($linkhref, 'height', PARAM_INT);
+            $options['name'] = core_media_player_native::get_attribute($linkhref, 'title');
+
+            $elements = array(
+                    'urls' => $urls,
+                    'options' => $options
+            );
         }
 
-        $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
-        $options['height'] = core_media_player_native::get_attribute($linkhref, 'height', PARAM_INT);
-        $options['name'] = core_media_player_native::get_attribute($linkhref, 'title');
-
-        $elements = array(
-            'urls' => $urls,
-            'options' => $options
-        );
-
         return $elements;
-
     }
 
     /**
