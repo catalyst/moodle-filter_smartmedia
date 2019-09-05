@@ -172,11 +172,16 @@ class filter_smartmedia extends moodle_text_filter {
     private function get_smart_elements($linkhref) {
         $urls = array();
         $options = array();
+        $moodleurl = new \moodle_url($linkhref);
 
-        // TODO: add smart element processing. For now just use original file.
-        $href = new \moodle_url($linkhref);
+        // Get smartmedia elements.
+        $conversion = new \local_smartmedia\conversion();
+        $smartmedia = $conversion->get_smart_media($moodleurl);
 
-        $urls[] = $href;
+        foreach ($smartmedia['media'] as $url) {
+            $urls[] = $url;
+        }
+
         $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
         $options['height'] = core_media_player_native::get_attribute($linkhref, 'height', PARAM_INT);
         $options['name'] = core_media_player_native::get_attribute($linkhref, 'title');
