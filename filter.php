@@ -1,4 +1,6 @@
 <?php
+use filter_smartmedia\videojs_player;
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -211,7 +213,7 @@ class filter_smartmedia extends moodle_text_filter {
         $height = $options['height'];
         $embedoptions = array();
 
-        $videojs = new \media_videojs_plugin();
+        $videojs = new videojs_player();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 

@@ -120,6 +120,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $urls, $options); // Get result of invoked method.
+        error_log($proxy);
 
         $this->assertRegExp('~mediaplugin_videojs~', $proxy);
         $this->assertRegExp('~</video>~', $proxy);
