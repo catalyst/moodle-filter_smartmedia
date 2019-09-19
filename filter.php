@@ -28,6 +28,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use local_smartmedia\aws_api;
+use local_smartmedia\aws_elastic_transcoder;
+
 /**
  * Automatic smart media embedding filter class.
  *
@@ -176,12 +179,15 @@ class filter_smartmedia extends moodle_text_filter {
         $moodleurl = new \moodle_url($linkhref);
 
         // Get smartmedia elements.
-        $conversion = new \local_smartmedia\conversion();
+        $api = new aws_api();
+        $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+        $conversion = new \local_smartmedia\conversion($transcoder);
         $smartmedia = $conversion->get_smart_media($moodleurl);
 
         if (!empty($smartmedia['media'])) {
             foreach ($smartmedia['media'] as $url) {
                 $urls[] = $url;
+                error_log($url->out());
             }
 
             $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
