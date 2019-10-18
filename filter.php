@@ -187,7 +187,6 @@ class filter_smartmedia extends moodle_text_filter {
         if (!empty($smartmedia['media'])) {
             foreach ($smartmedia['media'] as $url) {
                 $urls[] = $url;
-                error_log($url->out());
             }
 
             $options['width'] = core_media_player_native::get_attribute($linkhref, 'width', PARAM_INT);
