@@ -36,6 +36,27 @@ require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the co
  */
 class filter_smartmedia_testcase extends advanced_testcase {
 
+    /*
+     * Set up method for this test suite.
+     */
+    public function setUp() {
+        $this->resetAfterTest(true);
+        global $CFG;
+        set_config('api_region', 'ap-southeast-2', 'local_smartmedia');
+        set_config('api_key', 'somefakekey', 'local_smartmedia');
+        set_config('api_secret', 'somefakesecret', 'local_smartmedia');
+        set_config('s3_input_bucket', 'inputbucket', 'local_smartmedia');
+        set_config('s3_output_bucket', 'outputbucket', 'local_smartmedia');
+        set_config('detectlabels', 1, 'local_smartmedia');
+        set_config('detectmoderation', 1, 'local_smartmedia');
+        set_config('detectfaces', 1, 'local_smartmedia');
+        set_config('detectpeople', 1, 'local_smartmedia');
+        set_config('detectsentiment', 1, 'local_smartmedia');
+        set_config('detectphrases', 1, 'local_smartmedia');
+        set_config('detectentities', 1, 'local_smartmedia');
+        set_config('transcribe', 1, 'local_smartmedia');
+    }
+
     /**
      * Test the video.js enabled method returns true.
      */
@@ -100,9 +121,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
 
-        $this->assertEquals('/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4', $proxy['urls'][0]->get_path());
-        $this->assertEmpty($proxy['options']['width']);
-        $this->assertEmpty($proxy['options']['height']);
+        $this->assertEmpty($proxy);
     }
 
     public function test_get_embed_markup_simple() {
@@ -142,38 +161,4 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals($inputtext, $outputtext);
     }
 
-    /**
-     * A link tag was matched in the source text,
-     * but the file type isn't one we can process.
-     */
-    public function test_filter_replace_callback() {
-        $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, array());
-
-        $match = array(
-            '<a href="http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4">SampleVideo1mb.mp4</a>',
-            'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4');
-
-        // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'replace_callback');
-        $method->setAccessible(true); // Allow accessing of private method.
-        $proxy = $method->invoke($filterplugin, $match); // Get result of invoked method.
-    }
-
-    public function test_filter_smartmedia_filter() {
-        $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, array());
-
-        $validlinks = array(
-            '<div class="no-overflow">'
-                .'<a href="http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4">SampleVideo1mb.mp4</a>'
-            .'</div>'
-        );
-
-        // Test for valid link.
-        foreach ($validlinks as $text) {
-            $filter = $filterplugin->filter($text);
-
-        }
-    }
 }
