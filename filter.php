@@ -224,6 +224,25 @@ class filter_smartmedia extends moodle_text_filter {
 
     }
 
+    private function get_placeholder_markkup(string $linkhref, string $fulltext) : string {
+        global $OUTPUT;
+        $moodleurl = new \moodle_url($linkhref);
+        $markup = $fulltext;
+        $context = new \stdClass();
+
+        // Get status of conversion.
+        $api = new aws_api();
+        $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+        $conversion = new \local_smartmedia\conversion($transcoder);
+        $conversionstatus = $conversion->will_convert($moodleurl);
+
+        if ($conversionstatus != $conversion::CONVERSION_ERROR) {
+            $markup = $OUTPUT->render_from_template('filter_smartmedia/placeholder', $context);
+        }
+
+        return $markup;
+    }
+
     /**
      * Given a matched link check if there is smartmedia available,
      * and return updated link if there is.
@@ -234,13 +253,14 @@ class filter_smartmedia extends moodle_text_filter {
     private function replace_callback(array $matches) : string {
 
         $linkhref = $matches[1]; // Second element is the href of the link.
+        $fulltext = $matches[0]; // First element is the full matched link markup.
         $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
 
         if (!empty($elements)) {
             $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
         } else {
-            // If no smartmedia found just return content unchanged and give other filters a chance.
-            $replacedlink = $matches[0]; // First element is the full matched link markup.
+            // If no smartmedia found add the correct placeholder markup..
+            $replacedlink = $this->get_placeholder_markkup($linkhref, $fulltext);
         }
 
         return $replacedlink;

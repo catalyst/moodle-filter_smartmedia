@@ -161,4 +161,67 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals($inputtext, $outputtext);
     }
 
+    /**
+     * Test method that gets smart media placeholder markup.
+     */
+    public function test_get_placeholder_markkup() {
+        $this->resetAfterTest(true);
+
+        global $DB;
+        $filterplugin = new filter_smartmedia(null, array());
+
+        $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
+        $fulltext = '<div class="no-overflow">'
+            .'<a href="' . $linkhref . '">' . $linkhref . '</a>'
+            .'</div>';
+
+        // Setup for testing.
+        $fs = new file_storage();
+
+        // Mock the initial file record from which conversions were made.
+        $initialfilerecord = array (
+            'contextid' => 31,
+            'component' => 'mod_forum',
+            'filearea' => 'attachment',
+            'itemid' => 2,
+            'filepath' => '/',
+            'filename' => 'myfile1.mp4');
+        $initialfile = $fs->create_file_from_string($initialfilerecord, 'the first test file');
+        $contenthash = $initialfile->get_contenthash();
+
+        // Add a successful conversion status for this file.
+        $conversionrecord = new \stdClass();
+        $conversionrecord->pathnamehash = $contenthash;
+        $conversionrecord->contenthash = $contenthash;
+        $conversionrecord->status = 201;
+        $conversionrecord->transcribe_status = 201;
+        $conversionrecord->rekog_label_status = 201;
+        $conversionrecord->rekog_moderation_status = 201;
+        $conversionrecord->rekog_face_status = 201;
+        $conversionrecord->rekog_person_status = 201;
+        $conversionrecord->detect_sentiment_status = 201;
+        $conversionrecord->detect_phrases_status = 201;
+        $conversionrecord->detect_entities_status = 201;
+        $conversionrecord->timecreated = time();
+        $conversionrecord->timemodified = time();
+
+        $href = moodle_url::make_pluginfile_url(
+            $initialfilerecord['contextid'], $initialfilerecord['component'], $initialfilerecord['filearea'],
+            $initialfilerecord['itemid'], $initialfilerecord['filepath'], $initialfilerecord['filename']);
+
+        // We're testing a private method, so we need to setup reflector magic.
+        $method = new ReflectionMethod('filter_smartmedia', 'get_placeholder_markkup');
+        $method->setAccessible(true); // Allow accessing of private method.
+
+        $proxy = $method->invoke($filterplugin, $linkhref, $fulltext); // Get result of invoked method.
+        error_log($proxy);
+
+        $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
+        error_log($proxy);
+
+        $DB->insert_record('local_smartmedia_conv', $conversionrecord);
+        $proxy = $method->invoke($filterplugin, $href ,$fulltext); // Get result of invoked method.
+        error_log($proxy);
+    }
+
 }
