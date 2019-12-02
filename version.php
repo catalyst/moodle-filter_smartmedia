@@ -29,3 +29,6 @@ $plugin->release = '2019120300';
 $plugin->version = 2019120300;
 $plugin->requires = 2018051700;
 $plugin->maturity = MATURITY_ALPHA;
+$plugin->dependencies = array(
+    'local_smartmedia' => 2019110500
+);
