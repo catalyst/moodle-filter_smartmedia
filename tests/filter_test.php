@@ -220,7 +220,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
 
         $DB->insert_record('local_smartmedia_conv', $conversionrecord);
-        $proxy = $method->invoke($filterplugin, $href ,$fulltext); // Get result of invoked method.
+        $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
         $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
     }
 
