@@ -237,6 +237,7 @@ class filter_smartmedia extends moodle_text_filter {
         $conversionstatus = $conversion->will_convert($moodleurl);
 
         if ($conversionstatus != $conversion::CONVERSION_ERROR) {
+            $context->linkhref = $linkhref;
             $markup = $OUTPUT->render_from_template('filter_smartmedia/placeholder', $context);
         }
 
@@ -255,12 +256,15 @@ class filter_smartmedia extends moodle_text_filter {
         $linkhref = $matches[1]; // Second element is the href of the link.
         $fulltext = $matches[0]; // First element is the full matched link markup.
         $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
+        $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
 
         if (!empty($elements)) {
             $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
-        } else {
+        } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup..
             $replacedlink = $this->get_placeholder_markkup($linkhref, $fulltext);
+        } else {
+            $replacedlink = $fulltext;
         }
 
         return $replacedlink;

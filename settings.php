@@ -15,17 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Smartmedia filter settings
  *
- * @package     filter_smartmedia
- * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    filter_smartmedia
+ * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->component = 'filter_smartmedia';
-$plugin->release = '2019120300';
-$plugin->version = 2019120300;
-$plugin->requires = 2018051700;
-$plugin->maturity = MATURITY_ALPHA;
+if ($ADMIN->fulltree) {
+    $settings->add(new admin_setting_configcheckbox(
+        'filter_smartmedia/enableplaceholder',
+        get_string('enableplaceholder', 'filter_smartmedia'),
+        get_string('enableplaceholder_desc', 'filter_smartmedia'),
+        1));
+}

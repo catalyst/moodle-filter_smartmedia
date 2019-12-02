@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
   }}
   {{!
-    @template local_smartmedia/placeholder
+    @template filter_smartmedia/placeholder
 
     Moodle place holder template.
 
@@ -25,6 +25,14 @@
     * n/a
 
     Example context (json):
-    {}
+    {"linkhref" : "http://moodle.local/pluginfile.php/27/mod_label/intro/BigBuckBunny.avi"}
   }}
-  <p>blah blah blah</p>
+<div class="local-smartmedia-placeholder-container">
+    <div class="local-smartmedia-placeholder">
+        <div class="local-smartmedia-placeholder-content">
+            <h3>{{# str }} pending, filter_smartmedia {{/ str }}</h3>
+            <a href="{{linkhref}}">{{# pix }} t/download, core, Download Original File {{/ pix }}</a>
+            <h5><a href="{{linkhref}}">{{# str }} download, filter_smartmedia {{/ str }}</a></h5>
+        </div>
+    </div>
+</div>

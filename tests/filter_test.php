@@ -214,14 +214,14 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
 
         $proxy = $method->invoke($filterplugin, $linkhref, $fulltext); // Get result of invoked method.
-        error_log($proxy);
+        $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
 
         $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
-        error_log($proxy);
+        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
 
         $DB->insert_record('local_smartmedia_conv', $conversionrecord);
         $proxy = $method->invoke($filterplugin, $href ,$fulltext); // Get result of invoked method.
-        error_log($proxy);
+        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
     }
 
 }
