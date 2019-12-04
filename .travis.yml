@@ -65,6 +65,7 @@ before_install:
 
 install:
   - moodle-plugin-ci add-plugin catalyst/moodle-local_aws
+  - moodle-plugin-ci add-plugin catalyst/moodle-local_smartmedia
   - moodle-plugin-ci install
 
 script:
