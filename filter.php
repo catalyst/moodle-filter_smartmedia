@@ -220,10 +220,19 @@ class filter_smartmedia extends moodle_text_filter {
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 
+        // Add download URLs as data to the video tag.
+
         return $newtext;
 
     }
 
+    /**
+     * Get placeholder markup.
+     *
+     * @param string $linkhref The link to the file for downloading.
+     * @param string $fulltext The full text of the element.
+     * @return string $markup The placeholder markup.
+     */
     private function get_placeholder_markkup(string $linkhref, string $fulltext) : string {
         global $OUTPUT;
         $moodleurl = new \moodle_url($linkhref);
