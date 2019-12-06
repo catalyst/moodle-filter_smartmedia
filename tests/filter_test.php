@@ -128,20 +128,26 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
-        $urls = array(new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4'));
+        $urls = array(new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8'));
         $options = array(
             'width' => '',
             'height' => '',
             'name' => ''
         );
+        $download = array(
+            new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4'),
+            new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp3'),
+        );
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
         $method->setAccessible(true); // Allow accessing of private method.
-        $proxy = $method->invoke($filterplugin, $urls, $options); // Get result of invoked method.
+        $proxy = $method->invoke($filterplugin, $urls, $options, $download); // Get result of invoked method.
 
         $this->assertRegExp('~mediaplugin_videojs~', $proxy);
         $this->assertRegExp('~</video>~', $proxy);
+        $this->assertRegExp('~ data-download-video~', $proxy);
+        $this->assertRegExp('~ data-download-audio~', $proxy);
     }
 
     /**
