@@ -240,9 +240,9 @@ class filter_smartmedia extends moodle_text_filter {
         // Add download URLs as data to the video tag.
         if (!empty($download)) {
             foreach ($download as $url) {
-                if ($this->string_ends_with($url->out(), '.mp4')){
+                if ($this->string_ends_with($url->out(), '.mp4')) {
                     $downloaddata .= 'data-download-video="' . $url->out(). '" ';
-                } else if ($this->string_ends_with($url->out(), '.mp3')){
+                } else if ($this->string_ends_with($url->out(), '.mp3')) {
                     $downloaddata .= 'data-download-audio="' . $url->out(). '" ';
                 }
             }
