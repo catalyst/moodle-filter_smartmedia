@@ -204,10 +204,11 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
+     * Check if string ends with.
      *
-     * @param string $haystack
-     * @param string $needle
-     * @return bool
+     * @param string $haystack The string to search in.
+     * @param string $needle The string to search for.
+     * @return bool Result of string check.
      */
     private function string_ends_with(string $haystack, string $needle) : bool {
         $length = strlen($needle);
@@ -222,8 +223,9 @@ class filter_smartmedia extends moodle_text_filter {
      * Given an array of Moodle URLs and an array of options,
      * return the VideoJS markup.
      *
-     * @param array $urls Source file Moodle URLS.
+     * @param array $urls Source file Moodle URLs.
      * @param array $options Options for the player.
+     * @param array $download Download Moodle URLs.
      * @return string $newtext Rendered VideoJS markup.
      */
     private function get_embed_markup(array $urls, array $options, array $download) : string {
