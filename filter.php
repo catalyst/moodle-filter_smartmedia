@@ -220,8 +220,37 @@ class filter_smartmedia extends moodle_text_filter {
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 
+        // Add download URLs as data to the video tag.
+
         return $newtext;
 
+    }
+
+    /**
+     * Get placeholder markup.
+     *
+     * @param string $linkhref The link to the file for downloading.
+     * @param string $fulltext The full text of the element.
+     * @return string $markup The placeholder markup.
+     */
+    private function get_placeholder_markkup(string $linkhref, string $fulltext) : string {
+        global $OUTPUT;
+        $moodleurl = new \moodle_url($linkhref);
+        $markup = $fulltext;
+        $context = new \stdClass();
+
+        // Get status of conversion.
+        $api = new aws_api();
+        $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+        $conversion = new \local_smartmedia\conversion($transcoder);
+        $conversionstatus = $conversion->will_convert($moodleurl);
+
+        if ($conversionstatus != $conversion::CONVERSION_ERROR) {
+            $context->linkhref = $linkhref;
+            $markup = $OUTPUT->render_from_template('filter_smartmedia/placeholder', $context);
+        }
+
+        return $markup;
     }
 
     /**
@@ -234,13 +263,17 @@ class filter_smartmedia extends moodle_text_filter {
     private function replace_callback(array $matches) : string {
 
         $linkhref = $matches[1]; // Second element is the href of the link.
+        $fulltext = $matches[0]; // First element is the full matched link markup.
         $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
+        $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
 
         if (!empty($elements)) {
             $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
+        } else if ($placeholder) {
+            // If no smartmedia found add the correct placeholder markup..
+            $replacedlink = $this->get_placeholder_markkup($linkhref, $fulltext);
         } else {
-            // If no smartmedia found just return content unchanged and give other filters a chance.
-            $replacedlink = $matches[0]; // First element is the full matched link markup.
+            $replacedlink = $fulltext;
         }
 
         return $replacedlink;
