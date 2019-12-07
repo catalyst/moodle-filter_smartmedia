@@ -243,9 +243,9 @@ class filter_smartmedia extends moodle_text_filter {
         if (!empty($download)) {
             foreach ($download as $url) {
                 if ($this->string_ends_with($url->out(), '.mp4')) {
-                    $downloaddata .= 'data-download-video="' . $url->out(). '" ';
+                    $downloaddata .= 'data-download-video="' . $url->out(true, array('forcedownload' => true)). '" ';
                 } else if ($this->string_ends_with($url->out(), '.mp3')) {
-                    $downloaddata .= 'data-download-audio="' . $url->out(). '" ';
+                    $downloaddata .= 'data-download-audio="' . $url->out(true, array('forcedownload' => true)). '" ';
                 }
             }
             $newtext = preg_replace('/\<video /', $downloaddata, $newtext);
@@ -262,7 +262,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param string $fulltext The full text of the element.
      * @return string $markup The placeholder markup.
      */
-    private function get_placeholder_markkup(string $linkhref, string $fulltext) : string {
+    private function get_placeholder_markup(string $linkhref, string $fulltext) : string {
         global $OUTPUT;
         $moodleurl = new \moodle_url($linkhref);
         $markup = $fulltext;
@@ -300,7 +300,7 @@ class filter_smartmedia extends moodle_text_filter {
             $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options'], $elements['download']);
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup..
-            $replacedlink = $this->get_placeholder_markkup($linkhref, $fulltext);
+            $replacedlink = $this->get_placeholder_markup($linkhref, $fulltext);
         } else {
             $replacedlink = $fulltext;
         }
