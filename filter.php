@@ -195,7 +195,8 @@ class filter_smartmedia extends moodle_text_filter {
 
             $elements = array(
                     'urls' => $urls,
-                    'options' => $options
+                    'options' => $options,
+                    'download' => $smartmedia['download']
             );
         }
 
@@ -203,24 +204,52 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
+     * Check if string ends with.
+     *
+     * @param string $haystack The string to search in.
+     * @param string $needle The string to search for.
+     * @return bool Result of string check.
+     */
+    private function string_ends_with(string $haystack, string $needle) : bool {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
+    /**
      * Given an array of Moodle URLs and an array of options,
      * return the VideoJS markup.
      *
-     * @param array $urls Source file Moodle URLS.
+     * @param array $urls Source file Moodle URLs.
      * @param array $options Options for the player.
+     * @param array $download Download Moodle URLs.
      * @return string $newtext Rendered VideoJS markup.
      */
-    private function get_embed_markup($urls, $options) : string {
+    private function get_embed_markup(array $urls, array $options, array $download) : string {
         $name = $options['name'];
         $width = $options['width'];
         $height = $options['height'];
         $embedoptions = array();
+        $downloaddata = '<video ';
 
         $videojs = new \media_videojs_plugin();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 
         // Add download URLs as data to the video tag.
+        if (!empty($download)) {
+            foreach ($download as $url) {
+                if ($this->string_ends_with($url->out(), '.mp4')) {
+                    $downloaddata .= 'data-download-video="' . $url->out(). '" ';
+                } else if ($this->string_ends_with($url->out(), '.mp3')) {
+                    $downloaddata .= 'data-download-audio="' . $url->out(). '" ';
+                }
+            }
+            $newtext = preg_replace('/\<video /', $downloaddata, $newtext);
+        }
 
         return $newtext;
 
@@ -268,7 +297,7 @@ class filter_smartmedia extends moodle_text_filter {
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
 
         if (!empty($elements)) {
-            $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options']);
+            $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options'], $elements['download']);
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup..
             $replacedlink = $this->get_placeholder_markkup($linkhref, $fulltext);
