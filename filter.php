@@ -265,6 +265,9 @@ class filter_smartmedia extends moodle_text_filter {
     private function get_placeholder_markup(string $linkhref, string $fulltext) : string {
         global $OUTPUT;
         $moodleurl = new \moodle_url($linkhref);
+        $path = $moodleurl->get_path();
+        $args = explode('/', $path);
+        $filename = array_pop($args);
         $markup = $fulltext;
         $context = new \stdClass();
 
@@ -276,6 +279,7 @@ class filter_smartmedia extends moodle_text_filter {
 
         if ($conversionstatus != $conversion::CONVERSION_ERROR) {
             $context->linkhref = $linkhref;
+            $context->filename = $filename;
             $markup = $OUTPUT->render_from_template('filter_smartmedia/placeholder', $context);
         }
 

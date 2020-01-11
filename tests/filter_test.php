@@ -216,7 +216,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
             $initialfilerecord['itemid'], $initialfilerecord['filepath'], $initialfilerecord['filename']);
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'get_placeholder_markkup');
+        $method = new ReflectionMethod('filter_smartmedia', 'get_placeholder_markup');
         $method->setAccessible(true); // Allow accessing of private method.
 
         $proxy = $method->invoke($filterplugin, $linkhref, $fulltext); // Get result of invoked method.
