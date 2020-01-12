@@ -176,7 +176,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         global $DB;
         $filterplugin = new filter_smartmedia(null, array());
 
-        $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
+        $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.avi';
         $fulltext = '<div class="no-overflow">'
             .'<a href="' . $linkhref . '">' . $linkhref . '</a>'
             .'</div>';
@@ -191,7 +191,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
             'filearea' => 'attachment',
             'itemid' => 2,
             'filepath' => '/',
-            'filename' => 'myfile1.mp4');
+            'filename' => 'myfile1.avi');
         $initialfile = $fs->create_file_from_string($initialfilerecord, 'the first test file');
         $contenthash = $initialfile->get_contenthash();
 

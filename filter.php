@@ -106,10 +106,26 @@ class filter_smartmedia extends moodle_text_filter {
         '.asf', // Type: video/x-ms-asf.
         '.avi', // Type: video/x-ms-wm.
         '.wmv', // Type: video/x-ms-wmv.
-
     );
 
     /**
+     * Types of media that most browsers will play natively.
+     *
+     * @var array
+     */
+    private $browsernative = array(
+        '.mp3', // Type: audio/mp3.
+        '.ogg', // Type: audio/ogg.
+        '.mp4', // Type: video/mp4.
+        '.webm', // Type: video/webm.
+    );
+
+    /**        '.dv', // Type: video/x-dv.
+        '.dif', // Type: video/x-dv.
+        '.flv', // Type: video/x-flv.
+        '.asf', // Type: video/x-ms-asf.
+        '.avi', // Type: video/x-ms-wm.
+        '.wmv', // Type: video/x-ms-wmv.
      * Setup page with filter requirements and other prepare stuff.
      *
      * @param moodle_page $page The page we are going to add requirements to.
@@ -161,6 +177,17 @@ class filter_smartmedia extends moodle_text_filter {
      */
     private function get_media_types() : string {
         $typestring = '\\'. implode('|\\', $this->mediatypes);
+
+        return $typestring;
+    }
+
+    /**
+     * Get the media container types that generally supported by browsers.
+     *
+     * @return string $typestring String of supported types.
+     */
+    private function get_browser_native_types() : string {
+        $typestring = '\\'. implode('|\\', $this->browsernative);
 
         return $typestring;
     }
@@ -270,6 +297,15 @@ class filter_smartmedia extends moodle_text_filter {
         $filename = array_pop($args);
         $markup = $fulltext;
         $context = new \stdClass();
+
+        // If file is of type that is browser native,
+        // don't show placeholder.
+        $nativetypes = $this->get_browser_native_types();
+        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $nativetypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
+        $isnative = preg_match($re, $markup);
+        if($isnative) {
+            return $markup;
+        }
 
         // Get status of conversion.
         $api = new aws_api();
