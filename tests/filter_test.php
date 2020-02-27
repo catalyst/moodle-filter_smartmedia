@@ -181,6 +181,12 @@ class filter_smartmedia_testcase extends advanced_testcase {
             .'<a href="' . $linkhref . '">' . $linkhref . '</a>'
             .'</div>';
 
+        // File with uppercase extension. IOS records video to .MOV for example.
+        $linkhref2 = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.MOV';
+        $fulltext2 = '<div class="no-overflow">'
+            .'<a href="' . $linkhref2 . '">' . $linkhref2 . '</a>'
+            .'</div>';
+
         // Setup for testing.
         $fs = new file_storage();
 
@@ -194,6 +200,16 @@ class filter_smartmedia_testcase extends advanced_testcase {
             'filename' => 'myfile1.avi');
         $initialfile = $fs->create_file_from_string($initialfilerecord, 'the first test file');
         $contenthash = $initialfile->get_contenthash();
+
+        $initialfilerecord2 = array (
+            'contextid' => 31,
+            'component' => 'mod_forum',
+            'filearea' => 'attachment',
+            'itemid' => 3,
+            'filepath' => '/',
+            'filename' => 'myfile2.MOV');
+        $initialfile2 = $fs->create_file_from_string($initialfilerecord2, 'the second test file');
+        $contenthash2 = $initialfile2->get_contenthash();
 
         // Add a successful conversion status for this file.
         $conversionrecord = new \stdClass();
@@ -211,9 +227,28 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $conversionrecord->timecreated = time();
         $conversionrecord->timemodified = time();
 
+        $conversionrecord2 = new \stdClass();
+        $conversionrecord2->pathnamehash = $contenthash2;
+        $conversionrecord2->contenthash = $contenthash2;
+        $conversionrecord2->status = 201;
+        $conversionrecord2->transcribe_status = 201;
+        $conversionrecord2->rekog_label_status = 201;
+        $conversionrecord2->rekog_moderation_status = 201;
+        $conversionrecord2->rekog_face_status = 201;
+        $conversionrecord2->rekog_person_status = 201;
+        $conversionrecord2->detect_sentiment_status = 201;
+        $conversionrecord2->detect_phrases_status = 201;
+        $conversionrecord2->detect_entities_status = 201;
+        $conversionrecord2->timecreated = time();
+        $conversionrecord2->timemodified = time();
+
         $href = moodle_url::make_pluginfile_url(
             $initialfilerecord['contextid'], $initialfilerecord['component'], $initialfilerecord['filearea'],
             $initialfilerecord['itemid'], $initialfilerecord['filepath'], $initialfilerecord['filename']);
+
+        $href2 = moodle_url::make_pluginfile_url(
+            $initialfilerecord2['contextid'], $initialfilerecord2['component'], $initialfilerecord2['filearea'],
+            $initialfilerecord2['itemid'], $initialfilerecord2['filepath'], $initialfilerecord2['filename']);
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'get_placeholder_markup');
@@ -227,6 +262,16 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
         $DB->insert_record('local_smartmedia_conv', $conversionrecord);
         $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
+        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+
+        $proxy = $method->invoke($filterplugin, $linkhref2, $fulltext2); // Get result of invoked method.
+        $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
+
+        $proxy = $method->invoke($filterplugin, $href2, $fulltext2); // Get result of invoked method.
+        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+
+        $DB->insert_record('local_smartmedia_conv', $conversionrecord2);
+        $proxy = $method->invoke($filterplugin, $href2, $fulltext2); // Get result of invoked method.
         $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
     }
 

@@ -33,6 +33,8 @@ env:
   matrix:
     - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
     - DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+    - DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
+    - DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
     - DB=pgsql MOODLE_BRANCH=master
     - DB=mysqli MOODLE_BRANCH=master
 
@@ -42,10 +44,18 @@ matrix:
       env: DB=pgsql MOODLE_BRANCH=master
     - php: 7.0
       env: DB=mysqli MOODLE_BRANCH=master
+    - php: 7.1
+      env: DB=pgsql MOODLE_BRANCH=master
+    - php: 7.1
+      env: DB=mysqli MOODLE_BRANCH=master
     - php: 7.0
       env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
     - php: 7.0
       env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+    - php: 7.0
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
+    - php: 7.0
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
 
 cache:
   directories:
