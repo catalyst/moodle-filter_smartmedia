@@ -303,7 +303,7 @@ class filter_smartmedia extends moodle_text_filter {
         $nativetypes = $this->get_browser_native_types();
         $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $nativetypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
         $isnative = preg_match($re, $markup);
-        if($isnative) {
+        if ($isnative) {
             return $markup;
         }
 
@@ -380,7 +380,8 @@ class filter_smartmedia extends moodle_text_filter {
         // We are only processing files for Moodle activities and resources,
         // not valid media types that are delivered externally to Moodle.
         $mediatypes = $this->get_media_types();
-        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
+        // We can safely perform the entire regex case_insentive, as file conversion and embedding is handled seperately.
+        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~i';
         $newtext = preg_replace_callback($re, array($this, 'replace_callback'), $text);
 
         // Return the string after it has been processed by the above.
