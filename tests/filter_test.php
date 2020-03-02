@@ -102,8 +102,11 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method = new ReflectionMethod('filter_smartmedia', 'get_media_types');
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin); // Get result of invoked method.
-
-        $this->assertStringContainsString('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
+        if (method_exists($this, 'assertStringContainsString')) {
+            $this->assertStringContainsString('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
+        } else {
+            $this->assertContains('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
+        }
     }
 
     /**
@@ -255,24 +258,46 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
 
         $proxy = $method->invoke($filterplugin, $linkhref, $fulltext); // Get result of invoked method.
-        $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
+        if (method_exists($this, 'assertStringNotContainsString')) {
+            $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertNotContains('local-smartmedia-placeholder-container', $proxy);
+        }
 
         $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
-        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        if (method_exists($this, 'assertStringContainsString')) {
+            $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertContains('local-smartmedia-placeholder-container', $proxy);
+        }
 
         $DB->insert_record('local_smartmedia_conv', $conversionrecord);
         $proxy = $method->invoke($filterplugin, $href, $fulltext); // Get result of invoked method.
-        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        if (method_exists($this, 'assertStringContainsString')) {
+            $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertContains('local-smartmedia-placeholder-container', $proxy);
+        }
 
         $proxy = $method->invoke($filterplugin, $linkhref2, $fulltext2); // Get result of invoked method.
-        $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
-
+        if (method_exists($this, 'assertStringNotContainsString')) {
+            $this->assertStringNotContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertNotContains('local-smartmedia-placeholder-container', $proxy);
+        }
         $proxy = $method->invoke($filterplugin, $href2, $fulltext2); // Get result of invoked method.
-        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
-
+        if (method_exists($this, 'assertStringContainsString')) {
+            $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertContains('local-smartmedia-placeholder-container', $proxy);
+        }
         $DB->insert_record('local_smartmedia_conv', $conversionrecord2);
         $proxy = $method->invoke($filterplugin, $href2, $fulltext2); // Get result of invoked method.
-        $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        if (method_exists($this, 'assertStringContainsString')) {
+            $this->assertStringContainsString('local-smartmedia-placeholder-container', $proxy);
+        } else {
+            $this->assertContains('local-smartmedia-placeholder-container', $proxy);
+        }
     }
 
 }
