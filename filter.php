@@ -74,38 +74,38 @@ class filter_smartmedia extends moodle_text_filter {
      * @var array
      */
     private $mediatypes = array(
-        '.aac', // Type: audio/aac.
-        '.au', // Type: audio/au.
-        '.mp3', // Type: audio/mp3.
-        '.m4a', // Type: audio/mp4.
-        '.oga', // Type: audio/ogg.
-        '.ogg', // Type: audio/ogg.
-        '.wav', // Type: audio/wav.
-        '.aif', // Type: audio/x-aiff.
-        '.aiff', // Type: audio/x-aiff.
-        '.aifc', // Type: audio/x-aiff.
-        '.m3u', // Type: audio/x-mpegurl.
-        '.wma', // Type: audio/x-ms-wma.
-        '.ram', // Type: audio/x-pn-realaudio-plugin.
-        '.rm', // Type: audio/x-pn-realaudio-plugin.
-        '.rv', // Type: audio/x-pn-realaudio-plugin.
-        '.mp4', // Type: video/mp4.
-        '.m4v', // Type: video/mp4.
-        '.f4v', // Type: video/mp4.
-        '.mpeg', // Type: video/mpeg.
-        '.mpe', // Type: video/mpeg.
-        '.mpg', // Type: video/mpeg.
-        '.ogv', // Type: video/ogg.
-        '.qt', // Type: video/quicktime.
-        '.3gp', // Type: video/quicktime.
-        '.mov', // Type: video/quicktime.
-        '.webm', // Type: video/webm.
-        '.dv', // Type: video/x-dv.
-        '.dif', // Type: video/x-dv.
-        '.flv', // Type: video/x-flv.
-        '.asf', // Type: video/x-ms-asf.
-        '.avi', // Type: video/x-ms-wm.
-        '.wmv', // Type: video/x-ms-wmv.
+        'aac', // Type: audio/aac.
+        'au', // Type: audio/au.
+        'mp3', // Type: audio/mp3.
+        'm4a', // Type: audio/mp4.
+        'oga', // Type: audio/ogg.
+        'ogg', // Type: audio/ogg.
+        'wav', // Type: audio/wav.
+        'aif', // Type: audio/x-aiff.
+        'aiff', // Type: audio/x-aiff.
+        'aifc', // Type: audio/x-aiff.
+        'm3u', // Type: audio/x-mpegurl.
+        'wma', // Type: audio/x-ms-wma.
+        'ram', // Type: audio/x-pn-realaudio-plugin.
+        'rm', // Type: audio/x-pn-realaudio-plugin.
+        'rv', // Type: audio/x-pn-realaudio-plugin.
+        'mp4', // Type: video/mp4.
+        'm4v', // Type: video/mp4.
+        'f4v', // Type: video/mp4.
+        'mpeg', // Type: video/mpeg.
+        'mpe', // Type: video/mpeg.
+        'mpg', // Type: video/mpeg.
+        'ogv', // Type: video/ogg.
+        'qt', // Type: video/quicktime.
+        '3gp', // Type: video/quicktime.
+        'mov', // Type: video/quicktime.
+        'webm', // Type: video/webm.
+        'dv', // Type: video/x-dv.
+        'dif', // Type: video/x-dv.
+        'flv', // Type: video/x-flv.
+        'asf', // Type: video/x-ms-asf.
+        'avi', // Type: video/x-ms-wm.
+        'wmv', // Type: video/x-ms-wmv.
     );
 
     /**
@@ -120,12 +120,32 @@ class filter_smartmedia extends moodle_text_filter {
         '.webm', // Type: video/webm.
     );
 
-    /**        '.dv', // Type: video/x-dv.
-        '.dif', // Type: video/x-dv.
-        '.flv', // Type: video/x-flv.
-        '.asf', // Type: video/x-ms-asf.
-        '.avi', // Type: video/x-ms-wm.
-        '.wmv', // Type: video/x-ms-wmv.
+    /**
+     * Conversion controller used for filtering.
+     *
+     * @var \local_smartmedia\conversion
+     */
+    private $conversion;
+
+    /**
+     * Set any context-specific configuration for this filter.
+     *
+     * @param context $context The current context.
+     * @param array $localconfig Any context-specific configuration for this filter.
+     */
+    public function __construct($context, array $localconfig, \local_smartmedia\conversion $conversion = null) {
+        parent::__construct($context, $localconfig);
+
+        if (!empty($conversion)) {
+            $this->conversion = $conversion;
+        } else {
+            $api = new aws_api();
+            $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+            $this->conversion = new \local_smartmedia\conversion($transcoder);
+        }
+    }
+
+    /**
      * Setup page with filter requirements and other prepare stuff.
      *
      * @param moodle_page $page The page we are going to add requirements to.
@@ -171,17 +191,6 @@ class filter_smartmedia extends moodle_text_filter {
     }
 
     /**
-     * Get the media container types that are supported by this filter.
-     *
-     * @return string $typestring String of supported types.
-     */
-    private function get_media_types() : string {
-        $typestring = '\\'. implode('|\\', $this->mediatypes);
-
-        return $typestring;
-    }
-
-    /**
      * Get the media container types that generally supported by browsers.
      *
      * @return string $typestring String of supported types.
@@ -205,11 +214,7 @@ class filter_smartmedia extends moodle_text_filter {
         $elements = array();
         $moodleurl = new \moodle_url($linkhref);
 
-        // Get smartmedia elements.
-        $api = new aws_api();
-        $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
-        $conversion = new \local_smartmedia\conversion($transcoder);
-        $smartmedia = $conversion->get_smart_media($moodleurl);
+        $smartmedia = $this->conversion->get_smart_media($moodleurl);
 
         if (!empty($smartmedia['media'])) {
             foreach ($smartmedia['media'] as $url) {
@@ -327,12 +332,9 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         // Get status of conversion.
-        $api = new aws_api();
-        $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
-        $conversion = new \local_smartmedia\conversion($transcoder);
-        $conversionstatus = $conversion->will_convert($moodleurl);
+        $conversionstatus = $this->conversion->will_convert($moodleurl);
 
-        if ($conversionstatus != $conversion::CONVERSION_ERROR) {
+        if ($conversionstatus != $this->conversion::CONVERSION_ERROR) {
             $context->linkhref = $linkhref;
             $context->filename = $filename;
             $markup = $OUTPUT->render_from_template('filter_smartmedia/placeholder', $context);
@@ -348,19 +350,16 @@ class filter_smartmedia extends moodle_text_filter {
      * @param array $matches An array of link matches.
      * @return string
      */
-    private function replace_callback(array $matches) : string {
-
-        $linkhref = $matches[1]; // Second element is the href of the link.
-        $fulltext = $matches[0]; // First element is the full matched link markup.
-        $elements = $this->get_smart_elements($linkhref); // Get the smartmedia elements if they exist.
+    private function replace($target, $fulltext) : string {
+        $elements = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
 
         if (!empty($elements)) {
             $hasdata = !empty($elements['metadata']);
-            $replacedlink = $this->get_embed_markup($linkhref, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
+            $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup..
-            $replacedlink = $this->get_placeholder_markup($linkhref, $fulltext);
+            $replacedlink = $this->get_placeholder_markup($target, $fulltext);
         } else {
             $replacedlink = $fulltext;
         }
@@ -391,21 +390,96 @@ class filter_smartmedia extends moodle_text_filter {
             return $text;
         }
 
-        if (stripos($text, '</a>') === false) {
-            // Performance shortcut - if there are no </a> tags, nothing can match.
+        if (stripos($text, '</a>') === false && stripos($text, '<video') === false) {
+            // Performance shortcut - if there are no video tags, nothing can match.
             return $text;
         }
 
-        // Next match and attempt to replace link tags, for valid media types.
-        // We are only processing files for Moodle activities and resources,
-        // not valid media types that are delivered externally to Moodle.
-        $mediatypes = $this->get_media_types();
-        // We can safely perform the entire regex case_insentive, as file conversion and embedding is handled seperately.
-        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $mediatypes .'])[\"\'][^>]*\>\X*?\<\/a\>~i';
-        $newtext = preg_replace_callback($re, array($this, 'replace_callback'), $text);
+        $originaldom = new DOMDocument();
 
-        // Return the string after it has been processed by the above.
-        return $newtext;
+        // Add a wrapping div so DOMDocument doesnt mangle the structure.
+        $loadtext = '<div>' . $text . '</div>';
+
+        // Supress warnings. HTML5 nodes currently throw warnings.
+        // Use flags to prevent html and body tags from being included.
+        @$originaldom->loadHTML($loadtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $videos = $originaldom->getElementsByTagName('video');
+        // Non-manipulatble objects.
+        $links = iterator_to_array($originaldom->getElementsByTagName('a'));
+        $videos = iterator_to_array($originaldom->getElementsByTagName('video'));
+        foreach ($videos as $video) {
+            // Get the source and use the target to get the smartmedia for the file.
+            $source = $video->getElementsByTagName('source');
+            // If there are no sources, can we replace? Not currently.
+            if (count($source) === 0) {
+                continue;
+            }
+            $target = $source[0]->getAttribute('src');
+
+            // Check if the target media type is compatible.
+            $components = explode('/', $target);
+            $ext = pathinfo(end($components), PATHINFO_EXTENSION);
+            if (stripos($target, 'pluginfile.php') === false ||
+                !in_array($ext, $this->mediatypes)) {
+                continue;
+            }
+
+            // Get the raw HTML for the replaced target.
+            $newtext = $this->replace($target, $text);
+
+            // Open that as a new doc to pull the video node out.
+            $tempdom = new DOMDocument();
+            @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            $newvideo = $tempdom->firstChild;
+
+            // Import that video node into the original DOM, and replace the original node.
+            $imported = $originaldom->importNode($newvideo, true);
+            $video->parentNode->replaceChild($imported, $video);
+        }
+
+        // We now need to check every <a> in the Dom.
+        // If it still exists after the video replacement,
+        // It will need to be smartmedia'd aswell.
+        $newlinks = $originaldom->getElementsByTagName('a');
+        foreach ($links as $link) {
+            // Check if this link node still exists. That's the ones we want.
+            $exists = false;
+            foreach ($newlinks as $newlink) {
+                if ($link->isSameNode($newlink)) {
+                    $exists = true;
+                }
+            }
+            if (!$exists) {
+                continue;
+            }
+
+            // Perform the same data manipulations as above, using the href of the <a> as the target.
+            $target = $link->getAttribute('href');
+
+            // Check if the target media type is compatible.
+            $components = explode('/', $target);
+            $ext = pathinfo(end($components), PATHINFO_EXTENSION);
+            if (stripos($target, 'pluginfile.php') === false ||
+                !in_array($ext, $this->mediatypes)) {
+                continue;
+            }
+
+            // Get the raw HTML for the replaced target.
+            $newtext = $this->replace($target, $text);
+
+            // Open that as a new doc to pull the video node out.
+            $tempdom = new DOMDocument();
+            @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            $newvideo = $tempdom->firstChild;
+
+            // Import that video node into the original DOM, and replace the original node.
+            $imported = $originaldom->importNode($newvideo, true);
+            $link->parentNode->replaceChild($imported, $link);
+        }
+
+        // Then return the raw html minus the wrapping div.
+        return substr(trim($originaldom->saveHTML()), 5, -6);
     }
 
 }

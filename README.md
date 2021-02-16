@@ -11,7 +11,7 @@ The Smart Media Filter (this plugin) works to help display smart media content i
 ## Supported Moodle Versions
 This plugin currently supports Moodle:
 
-* 3.7
+* 3.9
 
 ## Plugin Installation ##
 

@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use \local_smartmedia\conversion;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -93,23 +94,6 @@ class filter_smartmedia_testcase extends advanced_testcase {
     }
 
     /**
-     * Test getting media types string.
-     */
-    public function test_get_media_types() {
-        $filterplugin = new filter_smartmedia(null, array());
-
-        // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'get_media_types');
-        $method->setAccessible(true); // Allow accessing of private method.
-        $proxy = $method->invoke($filterplugin); // Get result of invoked method.
-        if (method_exists($this, 'assertStringContainsString')) {
-            $this->assertStringContainsString('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
-        } else {
-            $this->assertContains('|\.m4a|\.oga|\.ogg|\.wav|\.aif|', $proxy);
-        }
-    }
-
-    /**
      * Test method that gets smart media elements.
      * The href in htis test has no smart media elements available.
      */
@@ -131,6 +115,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->resetAfterTest(true);
         $filterplugin = new filter_smartmedia(null, array());
 
+        $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/OriginalVideo.mp4';
         $urls = array(new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8'));
         $options = array(
             'width' => '',
@@ -145,7 +130,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
         $method->setAccessible(true); // Allow accessing of private method.
-        $proxy = $method->invoke($filterplugin, $urls, $options, $download); // Get result of invoked method.
+        $proxy = $method->invoke($filterplugin, $linkhref, $urls, $options, $download, false); // Get result of invoked method.
 
         $this->assertRegExp('~mediaplugin_videojs~', $proxy);
         $this->assertRegExp('~</video>~', $proxy);
@@ -298,6 +283,110 @@ class filter_smartmedia_testcase extends advanced_testcase {
         } else {
             $this->assertContains('local-smartmedia-placeholder-container', $proxy);
         }
+    }
+
+
+    public function test_filter_replace_dataprovider() {
+        // Return [text, regex to match in output, match count]
+        return [
+            // <a>, Legit video link.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1
+            ],
+            // <a>, Not supported extension.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.wtf', 'My Fake Video'),
+                '~pluginfile\.php/fake\.wtf~',
+                1
+            ],
+            // <a>, Not a pluginfile.
+            [
+                html_writer::link('url.com/dodgypage.php/fake.mp4', 'My Fake Video'),
+                '~dodgypage\.php/fake\.mp4~',
+                1
+            ],
+            // <a>, 2 legit links.
+            [
+                '<div>' . html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'The Other Fake Video') . '</div>',
+                '~<video~',
+                2
+            ],
+            // <a>, 1 legit, 1 not.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
+                html_writer::link('url.com/dodgypage.php/fake.mp4', 'The Other Fake Video'),
+                '~<video~',
+                1
+            ],
+            // <video>, legit element.
+            [
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
+                '~pluginfile\.php.*fakename\.mp4~',
+                1
+            ],
+            // <video>, bad extension.
+            [
+                '<video><source src="url.com/pluginfile.php/fake.wtf"/></video>',
+                '~pluginfile\.php/fake\.wtf~',
+                1
+            ],
+            // <video>, not a pluginfile.
+            [
+                '<video><source src="url.com/dodgypage.php/fake.mp4"/></video>',
+                '~dodgypage\.php/fake\.mp4~',
+                1
+            ],
+            // <video>, 2 legit elements.
+            [
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
+                '~pluginfile\.php.*?fakename\.mp4?~',
+                2
+            ],
+            // <video> then <a>, 2 legit elements.
+            [
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~pluginfile\.php.*?fakename\.mp4?~',
+                2
+            ],
+            // <a> then <video>, 2 legit elements.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
+                '~pluginfile\.php.*?fakename\.mp4~',
+                2
+            ],
+            // <a> then <video>, 2 legit elements and one naughty.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
+                '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .
+                '<video><source src="url.com/dodgypage.php/fake.mp4"/></video>',
+                '~pluginfile\.php.*?fakename\.mp4~',
+                2
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider test_filter_replace_dataprovider
+     */
+    public function test_filter_replace($text, $regex, $matchcount) {
+        $conversion = $this->createMock(conversion::class);
+        $conversion->method('get_smart_media')->willReturn([
+            'media' => [
+                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+            ],
+            'data' => [],
+            'download' => []
+        ]);
+
+        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $result = $filterplugin->filter($text);
+        $this->assertEquals($matchcount, preg_match_all($regex, $result));
     }
 
 }
