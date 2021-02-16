@@ -223,7 +223,8 @@ class filter_smartmedia extends moodle_text_filter {
             $elements = array(
                     'urls' => $urls,
                     'options' => $options,
-                    'download' => $smartmedia['download']
+                    'download' => $smartmedia['download'],
+                    'metadata' => $smartmedia['data']
             );
         }
 
@@ -250,12 +251,16 @@ class filter_smartmedia extends moodle_text_filter {
      * Given an array of Moodle URLs and an array of options,
      * return the VideoJS markup.
      *
+     * @param string $linkhref Original media href.
      * @param array $urls Source file Moodle URLs.
      * @param array $options Options for the player.
      * @param array $download Download Moodle URLs.
+     * @param bool $hasdata Whether there is metadata associated with this smartmedia.
      * @return string $newtext Rendered VideoJS markup.
      */
-    private function get_embed_markup(array $urls, array $options, array $download) : string {
+    private function get_embed_markup(string $linkhref, array $urls, array $options, array $download, bool $hasdata) : string {
+        global $PAGE;
+
         $name = $options['name'];
         $width = $options['width'];
         $height = $options['height'];
@@ -276,6 +281,20 @@ class filter_smartmedia extends moodle_text_filter {
                 }
             }
             $newtext = preg_replace('/\<video /', $downloaddata, $newtext);
+        }
+
+        // Display download link only if there is data, and the user is a siteadmin.
+        if ($hasdata && is_siteadmin()) {
+            // Explode the url to get the filename component for naming.
+            $components = explode('/', $linkhref);
+            $newtext .= \html_writer::link(
+                new moodle_url('/filter/smartmedia/download_metadata.php', [
+                    'sesskey' => sesskey(),
+                    'conv' => base64_encode($linkhref),
+                    'title' => base64_encode(end($components))
+                ]),
+                get_string('downloadmetadata', 'filter_smartmedia')
+            );
         }
 
         return $newtext;
@@ -337,7 +356,8 @@ class filter_smartmedia extends moodle_text_filter {
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
 
         if (!empty($elements)) {
-            $replacedlink = $this->get_embed_markup($elements['urls'], $elements['options'], $elements['download']);
+            $hasdata = !empty($elements['metadata']);
+            $replacedlink = $this->get_embed_markup($linkhref, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup..
             $replacedlink = $this->get_placeholder_markup($linkhref, $fulltext);
