@@ -47,7 +47,7 @@ $zip = new zip_archive();
 $path = get_request_storage_directory() . '/' . $title . "_metadata.zip";
 $zip->open($path, file_archive::CREATE);
 
-foreach($smartmedia['data'] as $file) {
+foreach ($smartmedia['data'] as $file) {
     $zip->add_file_from_string($file->get_filename(), $file->get_content());
 }
 
