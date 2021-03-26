@@ -351,14 +351,51 @@ class filter_smartmedia extends moodle_text_filter {
      * @return string
      */
     private function replace($target, $fulltext) : string {
+        global $DB;
+
         $elements = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
+        $lookback = get_config('local_smartmedia', 'convertfrom');
+
+        if (empty($elements) && $placeholder) {
+            // The placeholder should only be displayed if this file will actually be converted.
+            // We need to verify that the file will be queued for conversion.
+            // Timecreated check.
+            $file = $this->conversion->get_file_from_url(new \moodle_url($target));
+
+            // If there is only one copy of this contenthash (excluding draft and user areas),
+            // We can just trust the file time.
+            if ($DB->count_records_select('files', 'contenthash = ? AND filearea <> ?', [
+                        $file->get_contenthash(),
+                        'draft'
+                    ]) === 1) {
+                if ($file->get_timecreated() < time() - $lookback) {
+                    $placeholder = false;
+                }
+            } else {
+                // There are instances like an activity copy in which the time fields remain old a new copy of a file.
+                // To avoid this, we need to check the dir record. This *should* be new.
+                $fs = get_file_storage();
+                $dir = $fs->get_file(
+                    $file->get_contextid(),
+                    $file->get_component(),
+                    $file->get_filearea(),
+                    $file->get_itemid(),
+                    $file->get_filepath(),
+                    '.'
+                );
+                // This timecreated is trustable for this context.
+                if ($dir->get_timecreated() < time() - $lookback) {
+                    $placeholder = false;
+                }
+            }
+        }
 
         if (!empty($elements)) {
             $hasdata = !empty($elements['metadata']);
             $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
         } else if ($placeholder) {
-            // If no smartmedia found add the correct placeholder markup..
+            // If no smartmedia found add the correct placeholder markup.
             $replacedlink = $this->get_placeholder_markup($target, $fulltext);
         } else {
             $replacedlink = $fulltext;
