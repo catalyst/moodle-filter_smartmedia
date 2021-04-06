@@ -362,32 +362,8 @@ class filter_smartmedia extends moodle_text_filter {
             // We need to verify that the file will be queued for conversion.
             // Timecreated check.
             $file = $this->conversion->get_file_from_url(new \moodle_url($target));
-
-            // If there is only one copy of this contenthash (excluding draft and user areas),
-            // We can just trust the file time.
-            if ($DB->count_records_select('files', 'contenthash = ? AND filearea <> ?', [
-                        $file->get_contenthash(),
-                        'draft'
-                    ]) === 1) {
-                if ($file->get_timecreated() < time() - $lookback) {
-                    $placeholder = false;
-                }
-            } else {
-                // There are instances like an activity copy in which the time fields remain old a new copy of a file.
-                // To avoid this, we need to check the dir record. This *should* be new.
-                $fs = get_file_storage();
-                $dir = $fs->get_file(
-                    $file->get_contextid(),
-                    $file->get_component(),
-                    $file->get_filearea(),
-                    $file->get_itemid(),
-                    $file->get_filepath(),
-                    '.'
-                );
-                // This timecreated is trustable for this context.
-                if ($dir->get_timecreated() < time() - $lookback) {
-                    $placeholder = false;
-                }
+            if ($file->get_timecreated() < time() - $lookback) {
+                $placeholder = false;
             }
         }
 
