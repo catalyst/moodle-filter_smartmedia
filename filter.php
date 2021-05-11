@@ -362,7 +362,7 @@ class filter_smartmedia extends moodle_text_filter {
             // We need to verify that the file will be queued for conversion.
             // Timecreated check.
             $file = $this->conversion->get_file_from_url(new \moodle_url($target));
-            if ($file->get_timecreated() < time() - $lookback) {
+            if (!empty($file) && $file->get_timecreated() < time() - $lookback) {
                 $placeholder = false;
             }
         }
