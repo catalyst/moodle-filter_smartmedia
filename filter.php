@@ -264,7 +264,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @return string $newtext Rendered VideoJS markup.
      */
     private function get_embed_markup(string $linkhref, array $urls, array $options, array $download, bool $hasdata) : string {
-        global $PAGE;
+        global $OUTPUT;
 
         $name = $options['name'];
         $width = $options['width'];
@@ -292,14 +292,14 @@ class filter_smartmedia extends moodle_text_filter {
         if ($hasdata && is_siteadmin()) {
             // Explode the url to get the filename component for naming.
             $components = explode('/', $linkhref);
-            $newtext .= \html_writer::link(
+            $newtext .= $OUTPUT->single_button(
                 new moodle_url('/filter/smartmedia/download_metadata.php', [
                     'sesskey' => sesskey(),
                     'conv' => base64_encode($linkhref),
                     'title' => base64_encode(end($components))
                 ]),
                 get_string('downloadmetadata', 'filter_smartmedia')
-            );
+            ) . '';
         }
 
         return $newtext;
@@ -351,7 +351,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @return string
      */
     private function replace($target, $fulltext) : string {
-        global $DB;
+        global $PAGE, $OUTPUT, $SESSION;
 
         $elements = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
@@ -368,8 +368,59 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!empty($elements)) {
+            $current = sha1($target . $fulltext);
+            // If we are going to replace, first we need to check if we are viewing the source for this video.
+            if (!isset($SESSION->local_smartmedia_viewsource)) {
+                $SESSION->local_smartmedia_viewsource = [];
+            } else {
+                // Get all the current state data.
+                $viewsource = $SESSION->local_smartmedia_viewsource;
+                $current = sha1($target . $fulltext);
+                $sourceparam = optional_param('source', '', PARAM_TEXT);
+                $smparam = optional_param('sm', '', PARAM_TEXT);
+
+                // If we have the SM param here, we need to embed and remove from the list.
+                if (array_key_exists($current, $viewsource)) {
+                    if ($smparam === $current) {
+                        unset($viewsource[$current]);
+                    }
+                }
+
+                // Now if the item is still present in the array, or we have a param to view source, use source.
+                if (array_key_exists($current, $viewsource) || $sourceparam === $current) {
+                    // Return the original markup, along with a button to swap back to smartmedia.
+                    $url = $PAGE->url;
+                    $url->param('sm', $current);
+                    $button = new \single_button(
+                        $url,
+                        get_string('viewoptimised', 'filter_smartmedia')
+                    );
+                    $button = \html_writer::div($OUTPUT->render($button), 'local-smartmedia-view-optimised');
+
+                    // Output the original source media and return.
+                    if (!array_key_exists($current, $viewsource)) {
+                        $viewsource[$current] = true;
+                        $SESSION->local_smartmedia_viewsource = $viewsource;
+                    }
+                    return $fulltext . $button;
+                }
+                // Now store the state back into the session.
+                $SESSION->local_smartmedia_viewsource = $viewsource;
+            }
+
+            // Get the complete smartmedia markup.
             $hasdata = !empty($elements['metadata']);
             $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
+
+            // Add a button to view source.
+            $url = $PAGE->url;
+            $url->param('source', $current);
+            $button = new \single_button(
+                $url,
+                get_string('viewsource', 'filter_smartmedia')
+            );
+            $replacedlink .= $OUTPUT->render($button);
+
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup.
             $replacedlink = $this->get_placeholder_markup($target, $fulltext);
