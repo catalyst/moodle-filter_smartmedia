@@ -233,7 +233,7 @@ class filter_smartmedia extends moodle_text_filter {
             );
         }
 
-        return $elements;
+        return [$smartmedia['context'], $elements];
     }
 
     /**
@@ -353,7 +353,7 @@ class filter_smartmedia extends moodle_text_filter {
     private function replace($target, $fulltext) : string {
         global $PAGE, $OUTPUT, $SESSION;
 
-        $elements = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
+        list($context, $elements) = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
         $lookback = get_config('local_smartmedia', 'convertfrom');
 
@@ -368,6 +368,13 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!empty($elements)) {
+            $url = $PAGE->url;
+            // Setup a page anchor if on the course page and viewing a section.
+            if ($context instanceof \context_module && strpos($url, '/course/view.php')) {
+                list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+                $url->set_anchor('section-' . $cm->sectionnum);
+            }
+
             $current = sha1($target . $fulltext);
             // If we are going to replace, first we need to check if we are viewing the source for this video.
             if (!isset($SESSION->local_smartmedia_viewsource)) {
@@ -389,11 +396,11 @@ class filter_smartmedia extends moodle_text_filter {
                 // Now if the item is still present in the array, or we have a param to view source, use source.
                 if (array_key_exists($current, $viewsource) || $sourceparam === $current) {
                     // Return the original markup, along with a button to swap back to smartmedia.
-                    $url = $PAGE->url;
                     $url->param('sm', $current);
                     $button = new \single_button(
                         $url,
-                        get_string('viewoptimised', 'filter_smartmedia')
+                        get_string('viewoptimised', 'filter_smartmedia'),
+                        'get'
                     );
                     $button = \html_writer::div($OUTPUT->render($button), 'local-smartmedia-view-optimised');
 
@@ -413,11 +420,11 @@ class filter_smartmedia extends moodle_text_filter {
             $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
 
             // Add a button to view source.
-            $url = $PAGE->url;
             $url->param('source', $current);
             $button = new \single_button(
                 $url,
-                get_string('viewsource', 'filter_smartmedia')
+                get_string('viewsource', 'filter_smartmedia'),
+                'get'
             );
             $replacedlink .= $OUTPUT->render($button);
 
