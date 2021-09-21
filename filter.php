@@ -375,14 +375,13 @@ class filter_smartmedia extends moodle_text_filter {
                 $url->set_anchor('section-' . $cm->sectionnum);
             }
 
-            $current = sha1($target . $fulltext);
+            $current = sha1($target);
             // If we are going to replace, first we need to check if we are viewing the source for this video.
             if (!isset($SESSION->local_smartmedia_viewsource)) {
                 $SESSION->local_smartmedia_viewsource = [];
             } else {
                 // Get all the current state data.
                 $viewsource = $SESSION->local_smartmedia_viewsource;
-                $current = sha1($target . $fulltext);
                 $sourceparam = optional_param('source', '', PARAM_TEXT);
                 $smparam = optional_param('sm', '', PARAM_TEXT);
 
