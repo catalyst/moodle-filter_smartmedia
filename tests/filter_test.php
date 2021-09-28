@@ -106,8 +106,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'get_smart_elements');
         $method->setAccessible(true); // Allow accessing of private method.
-        $proxy = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
+        list($context, $proxy) = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
 
+        $this->assertEmpty($context);
         $this->assertEmpty($proxy);
     }
 
@@ -375,14 +376,18 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * @dataProvider test_filter_replace_dataprovider
      */
     public function test_filter_replace($text, $regex, $matchcount) {
+        global $PAGE;
+
         $conversion = $this->createMock(conversion::class);
         $conversion->method('get_smart_media')->willReturn([
             'media' => [
                 \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
             ],
             'data' => [],
-            'download' => []
+            'download' => [],
+            'context' => \context::instance_by_id(1)
         ]);
+        $PAGE->set_url(new moodle_url("/my/"));
 
         $filterplugin = new filter_smartmedia(null, array(), $conversion);
         $result = $filterplugin->filter($text);
