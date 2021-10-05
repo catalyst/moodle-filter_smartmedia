@@ -465,7 +465,7 @@ class filter_smartmedia extends moodle_text_filter {
             return $text;
         }
 
-        $originaldom = new DOMDocument();
+        $originaldom = new DOMDocument('1.0', 'UTF-8');
 
         // Add a wrapping div so DOMDocument doesnt mangle the structure.
         $loadtext = '<div>' . $text . '</div>';
@@ -499,7 +499,7 @@ class filter_smartmedia extends moodle_text_filter {
             $newtext = $this->replace($target, $text);
 
             // Open that as a new doc to pull the video node out.
-            $tempdom = new DOMDocument();
+            $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
             $newvideo = $tempdom->firstChild;
 
@@ -539,7 +539,7 @@ class filter_smartmedia extends moodle_text_filter {
             $newtext = $this->replace($target, $text);
 
             // Open that as a new doc to pull the video node out.
-            $tempdom = new DOMDocument();
+            $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
             $newvideo = $tempdom->firstChild;
 
