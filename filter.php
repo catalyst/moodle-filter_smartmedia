@@ -469,6 +469,8 @@ class filter_smartmedia extends moodle_text_filter {
 
         // Add a wrapping div so DOMDocument doesnt mangle the structure.
         $loadtext = '<div>' . $text . '</div>';
+        // Ensure the encoding can be loaded by the domdoc.
+        $loadtext = mb_convert_encoding($loadtext, 'HTML-ENTITIES', 'UTF-8');
 
         // Supress warnings. HTML5 nodes currently throw warnings.
         // Use flags to prevent html and body tags from being included.
@@ -497,6 +499,9 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the raw HTML for the replaced target.
             $newtext = $this->replace($target, $text);
+            // Encode to the domdocument usable format.
+            $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
+
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
@@ -537,6 +542,8 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the raw HTML for the replaced target.
             $newtext = $this->replace($target, $text);
+            // Encode to the domdocument usable format.
+            $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
