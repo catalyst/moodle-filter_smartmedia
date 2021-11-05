@@ -272,6 +272,14 @@ class filter_smartmedia extends moodle_text_filter {
         $embedoptions = array();
         $downloaddata = '<video ';
 
+        // Append the cachekey to attempt to shortcut file serving.
+        foreach ($urls as $url) {
+            $args = explode('/', $url->get_path());
+            $filename = end($args);
+            $key = sha1($filename . sesskey());
+            $url->param('key', $key);
+        }
+
         $videojs = new \media_videojs_plugin();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
@@ -491,7 +499,7 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Check if the target media type is compatible.
             $components = explode('/', $target);
-            $ext = pathinfo(end($components), PATHINFO_EXTENSION);
+            $ext = strtolower(pathinfo(end($components), PATHINFO_EXTENSION));
             if (stripos($target, 'pluginfile.php') === false ||
                 !in_array($ext, $this->mediatypes)) {
                 continue;
