@@ -272,14 +272,6 @@ class filter_smartmedia extends moodle_text_filter {
         $embedoptions = array();
         $downloaddata = '<video ';
 
-        // Append the cachekey to attempt to shortcut file serving.
-        foreach ($urls as $url) {
-            $args = explode('/', $url->get_path());
-            $filename = end($args);
-            $key = sha1($filename . sesskey());
-            $url->param('key', $key);
-        }
-
         $videojs = new \media_videojs_plugin();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
