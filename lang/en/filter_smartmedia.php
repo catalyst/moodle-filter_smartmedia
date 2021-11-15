@@ -35,5 +35,6 @@ $string['downloadmetadata'] = 'Download file metadata';
 $string['pending'] = 'Media conversion pending...';
 $string['enableplaceholder'] = 'Enable placeholder';
 $string['enableplaceholder_desc'] = 'When enabled a placeholder image will be displayed until smartmedia conversion completes';
+$string['smartmedia:viewsource'] = 'View source media';
 $string['viewoptimised'] = 'View optimised media';
 $string['viewsource'] = 'View source media';
