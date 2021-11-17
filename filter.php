@@ -393,7 +393,8 @@ class filter_smartmedia extends moodle_text_filter {
                 }
 
                 // Now if the item is still present in the array, or we have a param to view source, use source.
-                if (array_key_exists($current, $viewsource) || $sourceparam === $current) {
+                $usesource = array_key_exists($current, $viewsource) || $sourceparam === $current;
+                if ($usesource && has_capability('filter/smartmedia:viewsource', $context)) {
                     // Return the original markup, along with a button to swap back to smartmedia.
                     $url->param('sm', $current);
                     $button = new \single_button(
@@ -418,15 +419,16 @@ class filter_smartmedia extends moodle_text_filter {
             $hasdata = !empty($elements['metadata']);
             $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
 
-            // Add a button to view source.
-            $url->param('source', $current);
-            $button = new \single_button(
-                $url,
-                get_string('viewsource', 'filter_smartmedia'),
-                'get'
-            );
-            $replacedlink .= $OUTPUT->render($button);
-
+            if (has_capability('filter/smartmedia:viewsource', $context)) {
+                // Add a button to view source.
+                $url->param('source', $current);
+                $button = new \single_button(
+                    $url,
+                    get_string('viewsource', 'filter_smartmedia'),
+                    'get'
+                );
+                $replacedlink .= $OUTPUT->render($button);
+            }
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup.
             $replacedlink = $this->get_placeholder_markup($target, $fulltext);
@@ -501,7 +503,6 @@ class filter_smartmedia extends moodle_text_filter {
             $newtext = $this->replace($target, $text);
             // Encode to the domdocument usable format.
             $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
-
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
