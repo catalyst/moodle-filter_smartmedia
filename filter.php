@@ -409,6 +409,11 @@ class filter_smartmedia extends moodle_text_filter {
                         $viewsource[$current] = true;
                         $SESSION->local_smartmedia_viewsource = $viewsource;
                     }
+
+                    // Filter out any spacing that doesn't need to be there from atto editor.
+                    $fulltext = str_replace('<br>', '', $fulltext);
+                    $fulltext = str_replace('&nbsp;', '', $fulltext);
+
                     return $fulltext . $button;
                 }
                 // Now store the state back into the session.

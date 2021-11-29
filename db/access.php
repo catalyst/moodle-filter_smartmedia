@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 $capabilities = [
     'filter/smartmedia:viewsource' => [
         'captype' => 'read',
-        'contextlevel' => CONTEXT_USER,
+        'contextlevel' => CONTEXT_COURSE,
         'archetypes' => [
             'user' => CAP_ALLOW
         ]
