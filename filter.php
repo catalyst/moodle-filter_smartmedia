@@ -368,10 +368,21 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!empty($elements)) {
+            list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+
             $url = $PAGE->url;
+            if (strpos($url, '/lib/ajax/service.php')) {
+                // This was loaded Via Ajax, we need to instead guess the URL from context.
+                $url = $cm->get_url();
+
+                if ($url === null) {
+                    // The CM has no view info. Default to course page.
+                    $url = new moodle_url('/course/view.php', ['id' => $course->id]);
+                }
+            }
+
             // Setup a page anchor if on the course page and viewing a section.
-            if ($context instanceof \context_module && strpos($url, '/course/view.php')) {
-                list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+            if ($context instanceof \context_module && strpos($url, '/course/view.php') !== false) {
                 $url->set_anchor('section-' . $cm->sectionnum);
             }
 
@@ -452,6 +463,25 @@ class filter_smartmedia extends moodle_text_filter {
      * @return string $newtext The filtered Text.
      */
     public function filter($text, array $options = array()) {
+        global $SESSION;
+
+        // First check the page URL's for flags. Prevents Ajax load missing them.
+        if (!isset($SESSION->local_smartmedia_viewsource)) {
+            $SESSION->local_smartmedia_viewsource = [];
+        }
+
+        // Get all the current state data.
+        $viewsource = $SESSION->local_smartmedia_viewsource;
+        $sourceparam = optional_param('source', '', PARAM_TEXT);
+        $smparam = optional_param('sm', '', PARAM_TEXT);
+
+        // If we have the SM param here, we need to embed and remove from the list.
+        if (array_key_exists($smparam , $viewsource)) {
+            unset($viewsource[$smparam]);
+        } else if (!array_key_exists($sourceparam, $viewsource)) {
+            $viewsource[$sourceparam] = true;
+        }
+        $SESSION->local_smartmedia_viewsource = $viewsource;
 
         // First do some rapid checks to see if we can process the text
         // we've been given. If not then exit early.
