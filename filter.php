@@ -536,8 +536,11 @@ class filter_smartmedia extends moodle_text_filter {
                 continue;
             }
 
-            // Get the raw HTML for the replaced target.
-            $newtext = $this->replace($target, $text);
+            // Get the raw HTML for the replace target.
+            $videotext = $originaldom->saveHTML($video);
+            $newtext = $this->replace($target, $videotext);
+            // Encase in another div to prevent mangling when loading into the new domdoc.
+            $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
             $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
 
@@ -578,8 +581,11 @@ class filter_smartmedia extends moodle_text_filter {
                 continue;
             }
 
-            // Get the raw HTML for the replaced target.
-            $newtext = $this->replace($target, $text);
+            // Get the raw HTML for the replace target.
+            $linktext = $originaldom->saveHTML($link);
+            $newtext = $this->replace($target, $link);
+            // Encase in another div to prevent mangling when loading into the new domdoc.
+            $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
             $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
 
