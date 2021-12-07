@@ -368,8 +368,10 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!empty($elements)) {
-            list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
-
+            $cm = false;
+            if ($context instanceof \context_module) {
+                list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+            }
             $url = $PAGE->url;
             if (strpos($url, '/lib/ajax/service.php')) {
                 // This was loaded Via Ajax, we need to instead guess the URL from context.
