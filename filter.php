@@ -547,11 +547,17 @@ class filter_smartmedia extends moodle_text_filter {
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $newvideo = $tempdom->firstChild;
+            $newvideo = $tempdom->getElementsByTagName('video')[0];
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
             $video->parentNode->replaceChild($imported, $video);
+
+            // If the tempdom has a form, then there is a button to transfer over.
+            if (count($tempdom->getElementsByTagName('form')) > 0) {
+                $element = $originaldom->importNode($tempdom->getElementsByTagName('form')[0], true);
+                $imported->parentNode->insertBefore($element, $imported->nextSibling);
+            }
         }
 
         // We now need to check every <a> in the Dom.
@@ -583,7 +589,7 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the raw HTML for the replace target.
             $linktext = $originaldom->saveHTML($link);
-            $newtext = $this->replace($target, $link);
+            $newtext = $this->replace($target, $linktext);
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
@@ -592,11 +598,17 @@ class filter_smartmedia extends moodle_text_filter {
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $newvideo = $tempdom->firstChild;
+            $newvideo = $tempdom->getElementsByTagName('video')[0];
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
             $link->parentNode->replaceChild($imported, $link);
+
+            // If the tempdom has a form, then there is a button to transfer over.
+            if (count($tempdom->getElementsByTagName('form')) > 0) {
+                $element = $originaldom->importNode($tempdom->getElementsByTagName('form')[0], true);
+                $imported->parentNode->insertBefore($element, $imported->nextSibling);
+            }
         }
 
         // Then return the raw html minus the wrapping div.
