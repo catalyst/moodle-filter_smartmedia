@@ -600,6 +600,11 @@ class filter_smartmedia extends moodle_text_filter {
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
             $newvideo = $tempdom->getElementsByTagName('video')[0];
 
+            // If we haven't had a code replacement, just continue.
+            if (empty($newvideo)) {
+                continue;
+            }
+
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
             $link->parentNode->replaceChild($imported, $link);
