@@ -319,6 +319,13 @@ class filter_smartmedia extends moodle_text_filter {
         $path = $moodleurl->get_path();
         $args = explode('/', $path);
         $filename = array_pop($args);
+
+        // Cleanup the filename a bit.
+        $filename = urldecode($filename);
+        if (strlen($filename) > 30) {
+            $filename = substr($filename, 0, 30) . '...';
+        }
+
         $markup = $fulltext;
         $context = new \stdClass();
 
@@ -548,6 +555,11 @@ class filter_smartmedia extends moodle_text_filter {
             $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
             $newvideo = $tempdom->getElementsByTagName('video')[0];
+
+            if (is_null($newvideo)) {
+                // We must have replaced it with a placeholder. Use that as the new "video".
+                $newvideo = $tempdom->firstChild;
+            }
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
