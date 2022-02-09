@@ -628,8 +628,13 @@ class filter_smartmedia extends moodle_text_filter {
             }
         }
 
-        // Then return the raw html minus the wrapping div.
-        return substr(trim($originaldom->saveHTML()), 5, -6);
+        // The raw html minus the wrapping div.
+        $html = substr(trim($originaldom->saveHTML()), 5, -6);
+
+        // Add a wrapper class to all smart media video content, so it can be styled further later on.
+        $html = preg_replace('/(mediaplugin mediaplugin_videojs)/', '$1 local-smartmedia-wrapper', $html);
+
+        return $html;
     }
 
 }
