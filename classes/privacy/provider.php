@@ -24,8 +24,6 @@
 
 namespace filter_smartmedia\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for filter_smartmedia implementing null_provider.
  *
