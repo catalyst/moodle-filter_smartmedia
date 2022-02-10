@@ -26,8 +26,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 use local_smartmedia\aws_api;
 use local_smartmedia\aws_elastic_transcoder;
 
@@ -442,7 +440,13 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the complete smartmedia markup.
             $hasdata = !empty($elements['metadata']);
-            $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
+            $replacedlink = $this->get_embed_markup(
+                $target,
+                $elements['urls'],
+                $elements['options'],
+                $elements['download'],
+                $hasdata
+            );
 
             if (has_capability('filter/smartmedia:viewsource', $context)) {
                 // Add a button to view source.
