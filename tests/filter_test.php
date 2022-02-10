@@ -42,7 +42,6 @@ class filter_smartmedia_testcase extends advanced_testcase {
      */
     public function setUp() {
         $this->resetAfterTest(true);
-        global $CFG;
         set_config('api_region', 'ap-southeast-2', 'local_smartmedia');
         set_config('api_key', 'somefakekey', 'local_smartmedia');
         set_config('api_secret', 'somefakesecret', 'local_smartmedia');
@@ -288,80 +287,80 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
 
     public function test_filter_replace_dataprovider() {
-        // Return [text, regex to match in output, match count]
+        // Return [text, regex to match in output, match count].
         return [
-            // <a>, Legit video link.
+            // Test <a>, Legit video link.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1
             ],
-            // <a>, Not supported extension.
+            // Test <a>, Not supported extension.
             [
                 html_writer::link('url.com/pluginfile.php/fake.wtf', 'My Fake Video'),
                 '~pluginfile\.php/fake\.wtf~',
                 1
             ],
-            // <a>, Not a pluginfile.
+            // Test <a>, Not a pluginfile.
             [
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'My Fake Video'),
                 '~dodgypage\.php/fake\.mp4~',
                 1
             ],
-            // <a>, 2 legit links.
+            // Test <a>, 2 legit links.
             [
                 '<div>' . html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'The Other Fake Video') . '</div>',
                 '~<video~',
                 2
             ],
-            // <a>, 1 legit, 1 not.
+            // Test <a>, 1 legit, 1 not.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'The Other Fake Video'),
                 '~<video~',
                 1
             ],
-            // <video>, legit element.
+            // Test <video>, legit element.
             [
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
                 '~pluginfile\.php.*fakename\.mp4~',
                 1
             ],
-            // <video>, bad extension.
+            // Test <video>, bad extension.
             [
                 '<video><source src="url.com/pluginfile.php/fake.wtf"/></video>',
                 '~pluginfile\.php/fake\.wtf~',
                 1
             ],
-            // <video>, not a pluginfile.
+            // Test <video>, not a pluginfile.
             [
                 '<video><source src="url.com/dodgypage.php/fake.mp4"/></video>',
                 '~dodgypage\.php/fake\.mp4~',
                 1
             ],
-            // <video>, 2 legit elements.
+            // Test <video>, 2 legit elements.
             [
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
                 '~pluginfile\.php.*?fakename\.mp4?~',
                 2
             ],
-            // <video> then <a>, 2 legit elements.
+            // Test <video> then <a>, 2 legit elements.
             [
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~pluginfile\.php.*?fakename\.mp4?~',
                 2
             ],
-            // <a> then <video>, 2 legit elements.
+            // Test <a> then <video>, 2 legit elements.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>',
                 '~pluginfile\.php.*?fakename\.mp4~',
                 2
             ],
-            // <a> then <video>, 2 legit elements and one naughty.
+            // Test <a> then <video>, 2 legit elements and one naughty.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 '<video><source src="url.com/pluginfile.php/fake.mp4"/></video>' .

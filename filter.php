@@ -26,8 +26,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 use local_smartmedia\aws_api;
 use local_smartmedia\aws_elastic_transcoder;
 
@@ -442,7 +440,13 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the complete smartmedia markup.
             $hasdata = !empty($elements['metadata']);
-            $replacedlink = $this->get_embed_markup($target, $elements['urls'], $elements['options'], $elements['download'], $hasdata);
+            $replacedlink = $this->get_embed_markup(
+                $target,
+                $elements['urls'],
+                $elements['options'],
+                $elements['download'],
+                $hasdata
+            );
 
             if (has_capability('filter/smartmedia:viewsource', $context)) {
                 // Add a button to view source.
@@ -628,8 +632,13 @@ class filter_smartmedia extends moodle_text_filter {
             }
         }
 
-        // Then return the raw html minus the wrapping div.
-        return substr(trim($originaldom->saveHTML()), 5, -6);
+        // The raw html minus the wrapping div.
+        $html = substr(trim($originaldom->saveHTML()), 5, -6);
+
+        // Add a wrapper class to all smart media video content, so it can be styled further later on.
+        $html = preg_replace('/(mediaplugin mediaplugin_videojs)/', '$1 local-smartmedia-wrapper', $html);
+
+        return $html;
     }
 
 }
