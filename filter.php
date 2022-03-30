@@ -465,7 +465,8 @@ class filter_smartmedia extends moodle_text_filter {
             $replacedlink = $fulltext;
         }
 
-        return $replacedlink;
+        // Wrap just smartmedia content inside a wrapper div for styling targeting.
+        return '<div class="local-smartmedia-wrapper">' . $replacedlink . '</div>';
     }
 
     /**
@@ -558,22 +559,20 @@ class filter_smartmedia extends moodle_text_filter {
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $newvideo = $tempdom->getElementsByTagName('video')[0];
+            $xpath = new DomXPath($tempdom);
+            $query = $xpath->query("//*[contains(@class, 'local-smartmedia-wrapper')]");
 
-            if (is_null($newvideo)) {
-                // We must have replaced it with a placeholder. Use that as the new "video".
-                $newvideo = $tempdom->firstChild;
+            if (count($query) === 0) {
+                // Something went real wrong.
+                continue;
             }
+            $newvideo = $query->item(0);
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
-            $video->parentNode->replaceChild($imported, $video);
-
-            // If the tempdom has a form, then there is a button to transfer over.
-            if (count($tempdom->getElementsByTagName('form')) > 0) {
-                $element = $originaldom->importNode($tempdom->getElementsByTagName('form')[0], true);
-                $imported->parentNode->insertBefore($element, $imported->nextSibling);
-            }
+            // Replace target is the mediaplugin div 2 levels above the video. This swaps the whole block.
+            $replacetarget = $video->parentNode->parentNode;
+            $replacetarget->parentNode->replaceChild($imported, $replacetarget);
         }
 
         // We now need to check every <a> in the Dom.
@@ -614,29 +613,22 @@ class filter_smartmedia extends moodle_text_filter {
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
             @$tempdom->loadHTML($newtext, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $newvideo = $tempdom->getElementsByTagName('video')[0];
+            $xpath = new DomXPath($tempdom);
+            $query = $xpath->query("//*[contains(@class, 'local-smartmedia-wrapper')]");
 
-            // If we haven't had a code replacement, just continue.
-            if (empty($newvideo)) {
+            if (count($query) === 0) {
+                // If we haven't had a code replacement, just continue.
                 continue;
             }
+            $newvideo = $query->item(0);
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
             $link->parentNode->replaceChild($imported, $link);
-
-            // If the tempdom has a form, then there is a button to transfer over.
-            if (count($tempdom->getElementsByTagName('form')) > 0) {
-                $element = $originaldom->importNode($tempdom->getElementsByTagName('form')[0], true);
-                $imported->parentNode->insertBefore($element, $imported->nextSibling);
-            }
         }
 
         // The raw html minus the wrapping div.
         $html = substr(trim($originaldom->saveHTML()), 5, -6);
-
-        // Add a wrapper class to all smart media video content, so it can be styled further later on.
-        $html = preg_replace('/(mediaplugin mediaplugin_videojs)/', '$1 local-smartmedia-wrapper', $html);
 
         return $html;
     }
