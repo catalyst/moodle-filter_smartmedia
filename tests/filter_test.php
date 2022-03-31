@@ -401,4 +401,48 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals(count($matches), count($filtered));
     }
 
+    public function test_view_source() {
+        global $PAGE;
+        $this->setAdminUser();
+
+        $conversion = $this->createMock(conversion::class);
+        $conversion->method('get_smart_media')->willReturn([
+            'media' => [
+                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+            ],
+            'data' => [],
+            'download' => [],
+            'context' => \context::instance_by_id(1)
+        ]);
+        $PAGE->set_url(new moodle_url("/my/"));
+
+        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
+        $result = $filterplugin->filter($text);
+        $this->assertRegExp('/<button.*View source media.*<\/button>/', $result);
+    }
+
+    public function test_view_optimised() {
+        global $PAGE, $SESSION;
+        $this->setAdminUser();
+
+        $conversion = $this->createMock(conversion::class);
+        $conversion->method('get_smart_media')->willReturn([
+            'media' => [
+                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+            ],
+            'data' => [],
+            'download' => [],
+            'context' => \context::instance_by_id(1)
+        ]);
+        $PAGE->set_url(new moodle_url("/my/"));
+
+        // Setup condition to view source.
+        $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
+        $SESSION->local_smartmedia_viewsource = [sha1('url.com/pluginfile.php/fake.mp4') => true];
+
+        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $result = $filterplugin->filter($text);
+        $this->assertRegExp('/<button.*View optimised media.*<\/button>/', $result);
+    }
 }

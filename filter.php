@@ -432,7 +432,8 @@ class filter_smartmedia extends moodle_text_filter {
                     $fulltext = str_replace('<br>', '', $fulltext);
                     $fulltext = str_replace('&nbsp;', '', $fulltext);
 
-                    return $fulltext . $button;
+                    // Put in the smartmedia wrapper to keep styling consistent.
+                    return \html_writer::div($fulltext . $button, 'local-smartmedia-wrapper');
                 }
                 // Now store the state back into the session.
                 $SESSION->local_smartmedia_viewsource = $viewsource;
@@ -456,17 +457,20 @@ class filter_smartmedia extends moodle_text_filter {
                     get_string('viewsource', 'filter_smartmedia'),
                     'get'
                 );
-                $replacedlink .= $OUTPUT->render($button);
+                // Wrap just smartmedia content inside a wrapper div for styling targeting.
+                $replacedlink = \html_writer::div($replacedlink . $OUTPUT->render($button), 'local-smartmedia-wrapper');
+            } else {
+                $replacedlink = \html_writer::div($replacedlink, 'local-smartmedia-wrapper');
             }
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup.
-            $replacedlink = $this->get_placeholder_markup($target, $fulltext);
+            $replacedlink = \html_writer::div($this->get_placeholder_markup($target, $fulltext), 'local-smartmedia-wrapper');
         } else {
+            // Do nothing, no replacement candidate
             $replacedlink = $fulltext;
         }
 
-        // Wrap just smartmedia content inside a wrapper div for styling targeting.
-        return '<div class="local-smartmedia-wrapper">' . $replacedlink . '</div>';
+        return $replacedlink;
     }
 
     /**
@@ -571,7 +575,7 @@ class filter_smartmedia extends moodle_text_filter {
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
             // Replace target is the mediaplugin div 2 levels above the video. This swaps the whole block.
-            $replacetarget = $video->parentNode->parentNode;
+            $replacetarget = $video->parentNode;
             $replacetarget->parentNode->replaceChild($imported, $replacetarget);
         }
 
@@ -627,8 +631,11 @@ class filter_smartmedia extends moodle_text_filter {
             $link->parentNode->replaceChild($imported, $link);
         }
 
-        // The raw html minus the wrapping div.
-        $html = substr(trim($originaldom->saveHTML()), 5, -6);
+        $html = trim($originaldom->saveHTML());
+        if (strpos($html, '<div>') === 0) {
+            // The raw html minus the wrapping div.
+            $html = substr($html, 5, -6);
+        }
 
         return $html;
     }
