@@ -287,33 +287,38 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
 
     public function test_filter_replace_dataprovider() {
-        // Return [text, regex to match in output, match count].
+        // Return [text, regex to match in output, match count, mediaplugincount].
         // All <video> must have 2 surrounding divs, which matches the structure of video elements from other plugins.
         // This is then targeted in the node replacement for the filter.
+        // The mediaplugin count is how many divs with that class should be remaining after replacement of matching tags.
         return [
             // Test <a>, Legit video link.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
+                1,
                 1
             ],
             // Test <a>, Not supported extension.
             [
                 html_writer::link('url.com/pluginfile.php/fake.wtf', 'My Fake Video'),
                 '~pluginfile\.php/fake\.wtf~',
-                1
+                1,
+                0
             ],
             // Test <a>, Not a pluginfile.
             [
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'My Fake Video'),
                 '~dodgypage\.php/fake\.mp4~',
-                1
+                1,
+                0
             ],
             // Test <a>, 2 legit links.
             [
                 '<div>' . html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'The Other Fake Video') . '</div>',
                 '~<video~',
+                2,
                 2
             ],
             // Test <a>, 1 legit, 1 not.
@@ -321,38 +326,45 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'The Other Fake Video'),
                 '~<video~',
+                1,
                 1
             ],
             // Test <video>, legit element.
             [
-                '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
+                '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*fakename\.mp4~',
+                1,
                 1
+
             ],
             // Test <video>, bad extension.
             [
-                '<div><div><video><source src="url.com/pluginfile.php/fake.wtf"/></video></div></div>',
+                '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.wtf"/></video></div></div>',
                 '~pluginfile\.php/fake\.wtf~',
+                1,
                 1
             ],
             // Test <video>, not a pluginfile.
             [
-                '<div><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
+                '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~dodgypage\.php/fake\.mp4~',
+                1,
                 1
             ],
             // Test <video>, 2 legit elements.
             [
-                '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
+                '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4?~',
+                2,
                 2
             ],
             // Test <video> then <a>, 2 legit elements.
             [
-                '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
+                '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~pluginfile\.php.*?fakename\.mp4?~',
+                2,
                 2
             ],
             // Test <a> then <video>, 2 legit elements.
@@ -360,15 +372,17 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
+                2,
                 2
             ],
             // Test <a> then <video>, 2 legit elements and one naughty.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
-                '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
-                '<div><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
+                '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
+                '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
-                2
+                2,
+                3
             ],
         ];
     }
@@ -376,7 +390,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * @dataProvider test_filter_replace_dataprovider
      */
-    public function test_filter_replace($text, $regex, $matchcount) {
+    public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount) {
         global $PAGE;
 
         $conversion = $this->createMock(conversion::class);
@@ -396,9 +410,14 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
         // Count each instance of an ID, and confirm there are no collisions.
         $matches = [];
-        preg_match('/id=".*"?/', $result, $matches);
+        preg_match_all('/id=".*"?/', $result, $matches);
         $filtered = array_unique($matches);
         $this->assertEquals(count($matches), count($filtered));
+
+        // Now check that the number of 'mediaplugin' divs from multimedia filters is matching.
+        $matches = [];
+        preg_match_all('/class="mediaplugin/', $result, $matches);
+        $this->assertEquals(count($matches[0]), $mediaplugincount);
     }
 
     public function test_view_source() {
