@@ -574,8 +574,15 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
-            // Replace target is the mediaplugin div 2 levels above the video. This swaps the whole block.
-            $replacetarget = $video->parentNode;
+            // Replace target is the mediaplugin div 2 levels above the video if this is a proper videoJS embed. This swaps the whole block.
+            // Otherwise we need to replace only the video element itself, so we don't accidentally eat wrapping divs in HTML content.
+            $xpath = new DomXPath($originaldom);
+            $query = $xpath->query('ancestor::div[contains(@class, "mediaplugin")]', $video);
+            if (count($query) === 0) {
+                $replacetarget = $video;
+            } else {
+                $replacetarget = $query->item(0);
+            }
             $replacetarget->parentNode->replaceChild($imported, $replacetarget);
         }
 
