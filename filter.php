@@ -353,9 +353,9 @@ class filter_smartmedia extends moodle_text_filter {
      * and return updated link if there is.
      *
      * @param array $matches An array of link matches.
-     * @return string
+     * @return array Array of newtext and whether the text was replaced
      */
-    private function replace($target, $fulltext) : string {
+    private function replace($target, $fulltext) : array {
         global $PAGE, $OUTPUT, $SESSION;
 
         list($context, $elements) = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
@@ -433,7 +433,8 @@ class filter_smartmedia extends moodle_text_filter {
                     $fulltext = str_replace('&nbsp;', '', $fulltext);
 
                     // Put in the smartmedia wrapper to keep styling consistent.
-                    return \html_writer::div($fulltext . $button, 'local-smartmedia-wrapper');
+                    $html = \html_writer::div($fulltext . $button, 'local-smartmedia-wrapper');
+                    return [$html, false];
                 }
                 // Now store the state back into the session.
                 $SESSION->local_smartmedia_viewsource = $viewsource;
@@ -462,15 +463,18 @@ class filter_smartmedia extends moodle_text_filter {
             } else {
                 $replacedlink = \html_writer::div($replacedlink, 'local-smartmedia-wrapper');
             }
+            $replaced = true;
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup.
             $replacedlink = \html_writer::div($this->get_placeholder_markup($target, $fulltext), 'local-smartmedia-wrapper');
+            $replaced = true;
         } else {
             // Do nothing, no replacement candidate
             $replacedlink = $fulltext;
+            $replaced = false;
         }
 
-        return $replacedlink;
+        return [$replacedlink, $replaced];
     }
 
     /**
@@ -554,7 +558,7 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the raw HTML for the replace target.
             $videotext = $originaldom->saveHTML($video);
-            $newtext = $this->replace($target, $videotext);
+            list($newtext, $replaced) = $this->replace($target, $videotext);
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
@@ -574,14 +578,18 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Import that video node into the original DOM, and replace the original node.
             $imported = $originaldom->importNode($newvideo, true);
-            // Replace target is the mediaplugin div 2 levels above the video if this is a proper videoJS embed. This swaps the whole block.
-            // Otherwise we need to replace only the video element itself, so we don't accidentally eat wrapping divs in HTML content.
-            $xpath = new DomXPath($originaldom);
-            $query = $xpath->query('ancestor::div[contains(@class, "mediaplugin")]', $video);
-            if (count($query) === 0) {
-                $replacetarget = $video;
+            if ($replaced) {
+                // Replace target is the mediaplugin div 2 levels above the video if this is a proper videoJS embed. This swaps the whole block.
+                // Otherwise we need to replace only the video element itself, so we don't accidentally eat wrapping divs in HTML content.
+                $xpath = new DomXPath($originaldom);
+                $query = $xpath->query('ancestor::div[contains(@class, "mediaplugin")]', $video);
+                if (count($query) === 0) {
+                    $replacetarget = $video;
+                } else {
+                    $replacetarget = $query->item(0);
+                }
             } else {
-                $replacetarget = $query->item(0);
+                $replacetarget = $video;
             }
             $replacetarget->parentNode->replaceChild($imported, $replacetarget);
         }
@@ -615,7 +623,7 @@ class filter_smartmedia extends moodle_text_filter {
 
             // Get the raw HTML for the replace target.
             $linktext = $originaldom->saveHTML($link);
-            $newtext = $this->replace($target, $linktext);
+            list($newtext, $unused) = $this->replace($target, $linktext);
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.

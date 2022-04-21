@@ -27,9 +27,12 @@
 
 .local-smartmedia-view-optimised {
     text-align: center;
+    margin-top: 5px;
 }
+
 .local-smartmedia-view-source {
     text-align: center;
+    margin-bottom: 5px;
 }
 
 .local-smartmedia-wrapper > div {
