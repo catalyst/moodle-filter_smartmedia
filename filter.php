@@ -282,6 +282,9 @@ class filter_smartmedia extends moodle_text_filter {
         $matches = [];
 
         if (preg_match($pattern, $newtext, $matches)) {
+            // Note $matches[1] here is just what was matched.
+            // since it is the first parenthesized subpattern matched.
+            // see https://www.php.net/manual/en/function.preg-match.php.
             $originalvalue = $matches[1];
 
             $decoded = json_decode(htmlspecialchars_decode($originalvalue));
