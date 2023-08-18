@@ -274,6 +274,27 @@ class filter_smartmedia extends moodle_text_filter {
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 
+        // We need to tweak the data-setup-lazy value so that it has html5->hls->enableLowInitialPlaylist enabled.
+        // This passes the enableLowInitialPlaylist value to the videojs JS, which fixes audio-only
+        // streams being played when the site bandwidth is too low.
+        // Regex and str_replace are used so that we don't have to touch the Moodle core videojs code.
+        $pattern = '/data-setup-lazy=["\']([^"\']+)["\']/i';
+        $matches = [];
+
+        if (preg_match($pattern, $newtext, $matches)) {
+            $originalvalue = $matches[1];
+
+            $decoded = json_decode(htmlspecialchars_decode($originalvalue));
+            $decoded->html5 = [
+                'hls' => [
+                    'enableLowInitialPlaylist' => true
+                ]
+            ];
+
+            $newvalue = htmlspecialchars(json_encode($decoded));
+            $newtext = str_replace($originalvalue, $newvalue, $newtext);
+        }
+
         // Add download URLs as data to the video tag.
         if (!empty($download)) {
             foreach ($download as $url) {
