@@ -132,10 +132,10 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $linkhref, $urls, $options, $download, false); // Get result of invoked method.
 
-        $this->assertRegExp('~mediaplugin_videojs~', $proxy);
-        $this->assertRegExp('~</video>~', $proxy);
-        $this->assertRegExp('~ data-download-video~', $proxy);
-        $this->assertRegExp('~ data-download-audio~', $proxy);
+        $this->assertMatchesRegularExpression('~mediaplugin_videojs~', $proxy);
+        $this->assertMatchesRegularExpression('~</video>~', $proxy);
+        $this->assertMatchesRegularExpression('~ data-download-video~', $proxy);
+        $this->assertMatchesRegularExpression('~ data-download-audio~', $proxy);
     }
 
     /**
@@ -438,7 +438,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $filterplugin = new filter_smartmedia(null, array(), $conversion);
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $result = $filterplugin->filter($text);
-        $this->assertRegExp('/<button.*View source media.*<\/button>/', $result);
+        $this->assertMatchesRegularExpression('/<button.*View source media.*<\/button>/', $result);
     }
 
     public function test_view_optimised() {
@@ -462,6 +462,6 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
         $filterplugin = new filter_smartmedia(null, array(), $conversion);
         $result = $filterplugin->filter($text);
-        $this->assertRegExp('/<button.*View optimised media.*<\/button>/', $result);
+        $this->assertMatchesRegularExpression('/<button.*View optimised media.*<\/button>/', $result);
     }
 }
