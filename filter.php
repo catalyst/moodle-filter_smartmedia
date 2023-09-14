@@ -380,7 +380,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @return array Array of newtext and whether the text was replaced
      */
     private function replace($target, $fulltext) : array {
-        global $PAGE, $OUTPUT, $SESSION;
+        global $OUTPUT, $SESSION;
 
         list($context, $elements) = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
@@ -397,25 +397,7 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         if (!empty($elements)) {
-            $cm = false;
-            if ($context instanceof \context_module) {
-                list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
-            }
-            $url = $PAGE->url;
-            if (strpos($url, '/lib/ajax/service.php')) {
-                // This was loaded Via Ajax, we need to instead guess the URL from context.
-                $url = $cm->get_url();
-
-                if ($url === null) {
-                    // The CM has no view info. Default to course page.
-                    $url = new moodle_url('/course/view.php', ['id' => $course->id]);
-                }
-            }
-
-            // Setup a page anchor if on the course page and viewing a section.
-            if ($context instanceof \context_module && strpos($url, '/course/view.php') !== false) {
-                $url->set_anchor('section-' . $cm->sectionnum);
-            }
+            $url = $this->url_from_context($context);
 
             $current = sha1($target);
             // If we are going to replace, first we need to check if we are viewing the source for this video.
@@ -499,6 +481,51 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         return [$replacedlink, $replaced];
+    }
+
+    /**
+     * Gets the course/page url from the context.
+     *
+     * @param context $context
+     * @return moodle_url $url
+     */
+    private function url_from_context($context) {
+        global $PAGE;
+
+        // Defaults to page url.
+        $url = $PAGE->url;
+
+        // Find course/cm based on context.
+        $course = null;
+        $cm = null;
+
+        if ($context instanceof \context_module) {
+            list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+        }
+
+        if ($context instanceof \context_course) {
+            $course = get_course($context->instanceid);
+        }
+
+        // If loaded via Ajax, guess the URL from the context.
+        $isajax = strpos($url, 'lib/ajax/service.php') !== false;
+
+        // Start with course, as its the most likely to exist.
+        if ($isajax && !empty($course)) {
+            $url = new moodle_url('/course/view.php', ['id' => $course->id]);
+        }
+
+        // Then check the course module has a URL, if so then use that instead.
+        if ($isajax && !empty($cm) && !empty($cm->get->url())) {
+            $url = $cm->get_url();
+        }
+
+        // Setup a page anchor if on the course page and viewing a section.
+        if ($context instanceof \context_module && strpos($url, '/course/view.php') !== false && !empty($cm)) {
+            $url->set_anchor('section-' . $cm->sectionnum);
+        }
+
+        return $url;
     }
 
     /**
