@@ -287,31 +287,82 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
 
     public function test_filter_replace_dataprovider() {
-        // Return [text, regex to match in output, match count, mediaplugincount].
+        // Return [text, regex to match in output, match count, mediaplugincount, url, contextkey].
         // All <video> must have 2 surrounding divs, which matches the structure of video elements from other plugins.
         // This is then targeted in the node replacement for the filter.
         // The mediaplugin count is how many divs with that class should be remaining after replacement of matching tags.
         return [
-            // Test <a>, Legit video link.
+            // Test <a>, Legit video link via dashboard url.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
-                1
+                1,
+                '/my/',
+                'system'
+            ],
+            // Test <a>, Legit video link via webservice url in course context.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/lib/ajax/service.php',
+                'course'
+            ],
+            // Test <a>, Legit video link via webservice url in system context.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/lib/ajax/service.php',
+                'system'
+            ],
+            // Test <a>, Legit video link via webservice url in module context.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/lib/ajax/service.php',
+                'system'
+            ],
+            // Test <a>, Legit video link via course url.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/course/view.php?id=:courseid',
+                'course'
+            ],
+            // Test <a>, Legit video link via module url.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/mod/label/view.php?id=:cmid',
+                'module'
             ],
             // Test <a>, Not supported extension.
             [
                 html_writer::link('url.com/pluginfile.php/fake.wtf', 'My Fake Video'),
                 '~pluginfile\.php/fake\.wtf~',
                 1,
-                0
+                0,
+                '/my/',
+                'system'
             ],
             // Test <a>, Not a pluginfile.
             [
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'My Fake Video'),
                 '~dodgypage\.php/fake\.mp4~',
                 1,
-                0
+                0,
+                '/my/',
+                'system'
             ],
             // Test <a>, 2 legit links.
             [
@@ -319,7 +370,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'The Other Fake Video') . '</div>',
                 '~<video~',
                 2,
-                2
+                2,
+                '/my/',
+                'system'
             ],
             // Test <a>, 1 legit, 1 not.
             [
@@ -327,29 +380,37 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'The Other Fake Video'),
                 '~<video~',
                 1,
-                1
+                1,
+                '/my/',
+                'system'
+
             ],
             // Test <video>, legit element.
             [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*fakename\.mp4~',
                 1,
-                1
-
+                1,
+                '/my/',
+                'system'
             ],
             // Test <video>, bad extension.
             [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.wtf"/></video></div></div>',
                 '~pluginfile\.php/fake\.wtf~',
                 1,
-                1
+                1,
+                '/my/',
+                'system'
             ],
             // Test <video>, not a pluginfile.
             [
                 '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~dodgypage\.php/fake\.mp4~',
                 1,
-                1
+                1,
+                '/my/',
+                'system'
             ],
             // Test <video>, 2 legit elements.
             [
@@ -357,7 +418,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4?~',
                 2,
-                2
+                2,
+                '/my/',
+                'system'
             ],
             // Test <video> then <a>, 2 legit elements.
             [
@@ -365,7 +428,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~pluginfile\.php.*?fakename\.mp4?~',
                 2,
-                2
+                2,
+                '/my/',
+                'system'
             ],
             // Test <a> then <video>, 2 legit elements.
             [
@@ -373,7 +438,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
                 2,
-                2
+                2,
+                '/my/',
+                'system'
             ],
             // Test <a> then <video>, 2 legit elements and one naughty.
             [
@@ -382,7 +449,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
                 2,
-                3
+                3,
+                '/my/',
+                'system'
             ],
         ];
     }
@@ -390,8 +459,33 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * @dataProvider test_filter_replace_dataprovider
      */
-    public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount) {
+    public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey) {
         global $PAGE;
+
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['hiddensections' => 0, 'coursedisplay' => COURSE_DISPLAY_SINGLEPAGE]);
+        $module = $this->getDataGenerator()->create_module('label', ['course' => $course->id]);
+
+        // Replace courseid placeholder in pageurl.
+        if (strpos($pageurl, ':courseid') !== false) {
+            $pageurl = str_replace(':courseid', $course->id, $pageurl);
+        }
+
+        if (strpos($pageurl, ':cmid') !== false) {
+            $pageurl = str_replace(':cmid', $module->cmid, $pageurl);
+        }
+
+        switch($contextkey) {
+            case 'system':
+                $PAGE->set_context(\context_system::instance());
+                break;
+            case 'course':
+                $PAGE->set_context(\context_course::instance($course->id));
+                break;
+            case 'module':
+                $PAGE->set_context(\context_module::instance($module->cmid));
+                break;
+        }
 
         $conversion = $this->createMock(conversion::class);
         $conversion->method('get_smart_media')->willReturn([
@@ -402,7 +496,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
             'download' => [],
             'context' => \context::instance_by_id(1)
         ]);
-        $PAGE->set_url(new moodle_url("/my/"));
+        $PAGE->set_url(new moodle_url($pageurl));
 
         $filterplugin = new filter_smartmedia(null, array(), $conversion);
         $result = $filterplugin->filter($text);
