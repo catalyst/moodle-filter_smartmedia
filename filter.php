@@ -516,7 +516,7 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         // Then check the course module has a URL, if so then use that instead.
-        if ($isajax && !empty($cm) && !empty($cm->get->url())) {
+        if ($isajax && !empty($cm) && !empty($cm->get_url())) {
             $url = $cm->get_url();
         }
 
