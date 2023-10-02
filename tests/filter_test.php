@@ -301,15 +301,6 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '/my/',
                 'system'
             ],
-            // Test <a>, Legit video link via webservice url in course context.
-            [
-                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
-                '~<video~',
-                1,
-                1,
-                '/lib/ajax/service.php',
-                'course'
-            ],
             // Test <a>, Legit video link via webservice url in system context.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
@@ -319,6 +310,15 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '/lib/ajax/service.php',
                 'system'
             ],
+            // Test <a>, Legit video link via webservice url in course context.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/lib/ajax/service.php',
+                'course'
+            ],
             // Test <a>, Legit video link via webservice url in module context.
             [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
@@ -326,7 +326,16 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/lib/ajax/service.php',
-                'system'
+                'module'
+            ],
+            // Test <a>, Legit video link via webservice url in course context.
+            [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
+                '~<video~',
+                1,
+                1,
+                '/lib/ajax/service.php',
+                'course'
             ],
             // Test <a>, Legit video link via course url.
             [
@@ -343,7 +352,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 '~<video~',
                 1,
                 1,
-                '/mod/label/view.php?id=:cmid',
+                '/mod/forum/view.php?id=:cmid',
                 'module'
             ],
             // Test <a>, Not supported extension.
@@ -464,7 +473,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course(['hiddensections' => 0, 'coursedisplay' => COURSE_DISPLAY_SINGLEPAGE]);
-        $module = $this->getDataGenerator()->create_module('label', ['course' => $course->id]);
+        $module = $this->getDataGenerator()->create_module('forum', ['course' => $course->id]);
 
         // Replace courseid placeholder in pageurl.
         if (strpos($pageurl, ':courseid') !== false) {
@@ -494,7 +503,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
             ],
             'data' => [],
             'download' => [],
-            'context' => \context::instance_by_id(1)
+            'context' => $PAGE->context
         ]);
         $PAGE->set_url(new moodle_url($pageurl));
 
