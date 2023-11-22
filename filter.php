@@ -71,7 +71,7 @@ class filter_smartmedia extends moodle_text_filter {
      *
      * @var array
      */
-    private $mediatypes = array(
+    private $mediatypes = [
         'aac', // Type: audio/aac.
         'au', // Type: audio/au.
         'mp3', // Type: audio/mp3.
@@ -104,19 +104,19 @@ class filter_smartmedia extends moodle_text_filter {
         'asf', // Type: video/x-ms-asf.
         'avi', // Type: video/x-ms-wm.
         'wmv', // Type: video/x-ms-wmv.
-    );
+    ];
 
     /**
      * Types of media that most browsers will play natively.
      *
      * @var array
      */
-    private $browsernative = array(
+    private $browsernative = [
         '.mp3', // Type: audio/mp3.
         '.ogg', // Type: audio/ogg.
         '.mp4', // Type: video/mp4.
         '.webm', // Type: video/webm.
-    );
+    ];
 
     /**
      * Conversion controller used for filtering.
@@ -207,9 +207,9 @@ class filter_smartmedia extends moodle_text_filter {
      * @return array $elements The smart media elements to embed.
      */
     private function get_smart_elements(string $linkhref) : array {
-        $urls = array();
-        $options = array();
-        $elements = array();
+        $urls = [];
+        $options = [];
+        $elements = [];
         $moodleurl = new \moodle_url($linkhref);
 
         $smartmedia = $this->conversion->get_smart_media($moodleurl);
@@ -223,12 +223,12 @@ class filter_smartmedia extends moodle_text_filter {
             $options['height'] = core_media_player_native::get_attribute($linkhref, 'height', PARAM_INT);
             $options['name'] = core_media_player_native::get_attribute($linkhref, 'title');
 
-            $elements = array(
+            $elements = [
                     'urls' => $urls,
                     'options' => $options,
                     'download' => $smartmedia['download'],
-                    'metadata' => $smartmedia['data']
-            );
+                    'metadata' => $smartmedia['data'],
+            ];
         }
 
         return [$smartmedia['context'], $elements];
@@ -267,7 +267,7 @@ class filter_smartmedia extends moodle_text_filter {
         $name = $options['name'];
         $width = $options['width'];
         $height = $options['height'];
-        $embedoptions = array();
+        $embedoptions = [];
         $downloaddata = '<video ';
 
         $videojs = new \media_videojs_plugin();
@@ -290,8 +290,8 @@ class filter_smartmedia extends moodle_text_filter {
             $decoded = json_decode(htmlspecialchars_decode($originalvalue));
             $decoded->html5 = [
                 'hls' => [
-                    'enableLowInitialPlaylist' => true
-                ]
+                    'enableLowInitialPlaylist' => true,
+                ],
             ];
 
             $newvalue = htmlspecialchars(json_encode($decoded));
@@ -302,9 +302,9 @@ class filter_smartmedia extends moodle_text_filter {
         if (!empty($download)) {
             foreach ($download as $url) {
                 if ($this->string_ends_with($url->out(), '.mp4')) {
-                    $downloaddata .= 'data-download-video="' . $url->out(true, array('forcedownload' => true)). '" ';
+                    $downloaddata .= 'data-download-video="' . $url->out(true, ['forcedownload' => true]). '" ';
                 } else if ($this->string_ends_with($url->out(), '.mp3')) {
-                    $downloaddata .= 'data-download-audio="' . $url->out(true, array('forcedownload' => true)). '" ';
+                    $downloaddata .= 'data-download-audio="' . $url->out(true, ['forcedownload' => true]). '" ';
                 }
             }
             $newtext = preg_replace('/\<video /', $downloaddata, $newtext);
@@ -318,7 +318,7 @@ class filter_smartmedia extends moodle_text_filter {
                 new moodle_url('/filter/smartmedia/download_metadata.php', [
                     'sesskey' => sesskey(),
                     'conv' => base64_encode($linkhref),
-                    'title' => base64_encode(end($components))
+                    'title' => base64_encode(end($components)),
                 ]),
                 get_string('downloadmetadata', 'filter_smartmedia')
             ) . '';
@@ -475,7 +475,7 @@ class filter_smartmedia extends moodle_text_filter {
             $replacedlink = \html_writer::div($this->get_placeholder_markup($target, $fulltext), 'local-smartmedia-wrapper');
             $replaced = true;
         } else {
-            // Do nothing, no replacement candidate
+            // Do nothing, no replacement candidate.
             $replacedlink = $fulltext;
             $replaced = false;
         }
@@ -535,7 +535,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param array $options Extra options.
      * @return string $newtext The filtered Text.
      */
-    public function filter($text, array $options = array()) {
+    public function filter($text, array $options = []) {
         global $SESSION;
 
         // First check the page URL's for flags. Prevents Ajax load missing them.
@@ -565,7 +565,7 @@ class filter_smartmedia extends moodle_text_filter {
             return $text;
         }
 
-        if (!is_string($text) or empty($text)) {
+        if (!is_string($text) || empty($text)) {
             // Non string data can not be filtered anyway.
             return $text;
         }
@@ -653,8 +653,13 @@ class filter_smartmedia extends moodle_text_filter {
             // Check if this link node still exists. That's the ones we want.
             $exists = false;
             foreach ($newlinks as $newlink) {
-                if ($link->isSameNode($newlink)) {
-                    $exists = true;
+                try {
+                    if ($link->isSameNode($newlink)) {
+                        $exists = true;
+                    }
+                } catch (\Throwable $e) {
+                    // Some error, likely when the $link is no longer a valid DOMElement.
+                    continue;
                 }
             }
             if (!$exists) {
