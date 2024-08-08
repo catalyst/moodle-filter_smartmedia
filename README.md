@@ -16,7 +16,7 @@ This plugin currently supports Moodle:
 ## Plugin Installation ##
 
 1. Clone the plugin git repo into your Moodle codebase root `git clone git@github.com:catalyst/moodle-filter_smartmedia.git filter/smartmedia`
-2. This plugin also has a dependancy on the *loca/smartmedia* plugin, to install this plugin: clone the plugin git repo into your Moodle codebase root `git clone git@github.com:catalyst/moodle-local_smartmedia.git local/smartmedia`
+2. This plugin also has a dependency on the *local/smartmedia* plugin, to install this plugin: clone the plugin git repo into your Moodle codebase root `git clone git@github.com:catalyst/moodle-local_smartmedia.git local/smartmedia`
 3. Run the upgrade: `sudo -u www-data php admin/cli/upgrade` **Note:** the user may be different to www-data on your system.
 4. Enable and setup plugin. See [Plugin Settings](#plugin-settings)
 
