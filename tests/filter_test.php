@@ -40,7 +40,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /*
      * Set up method for this test suite.
      */
-    public function setUp() {
+    public function setUp(): void {
         $this->resetAfterTest(true);
         set_config('api_region', 'ap-southeast-2', 'local_smartmedia');
         set_config('api_key', 'somefakekey', 'local_smartmedia');
