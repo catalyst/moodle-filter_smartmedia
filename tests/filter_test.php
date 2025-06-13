@@ -466,6 +466,13 @@ final class filter_test extends advanced_testcase {
     }
 
     /**
+     * Test filter replacement
+     * @param string $text
+     * @param string $regex
+     * @param int $matchcount
+     * @param int $mediaplugincount
+     * @param string $pageurl
+     * @param string $contextkey
      * @dataProvider test_filter_replace_dataprovider
      */
     public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey): void {

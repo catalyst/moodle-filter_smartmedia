@@ -9,4 +9,3 @@ jobs:
     with:
       extra_plugin_runners: 'moodle-plugin-ci add-plugin --branch MOODLE_405_STABLE catalyst/moodle-local_smartmedia'
       disable_phpcpd: true
-      disable_phpdoc: true

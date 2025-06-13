@@ -124,6 +124,7 @@ class filter_smartmedia extends moodle_text_filter {
      *
      * @param context $context The current context.
      * @param array $localconfig Any context-specific configuration for this filter.
+     * @param conversion|null $conversion
      */
     public function __construct($context, array $localconfig, conversion $conversion = null) {
         parent::__construct($context, $localconfig);
@@ -370,7 +371,8 @@ class filter_smartmedia extends moodle_text_filter {
      * Given a matched link check if there is smartmedia available,
      * and return updated link if there is.
      *
-     * @param array $matches An array of link matches.
+     * @param string $target
+     * @param string $fulltext
      * @return array Array of newtext and whether the text was replaced
      */
     private function replace($target, $fulltext): array {

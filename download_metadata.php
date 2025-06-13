@@ -14,11 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use core\url;
-use local_smartmedia\aws_api;
-use local_smartmedia\aws_elastic_transcoder;
-use local_smartmedia\conversion;
-
 /**
  *  Smart media metadata download portal.
  *
@@ -26,6 +21,11 @@ use local_smartmedia\conversion;
  * @copyright  2021 Peter Burnett <peterburnett@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use core\url;
+use local_smartmedia\aws_api;
+use local_smartmedia\aws_elastic_transcoder;
+use local_smartmedia\conversion;
 
 require_once(__DIR__ . '/../../config.php');
 require_admin();
