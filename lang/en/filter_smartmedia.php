@@ -25,16 +25,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Smart Media';
-
-$string['filtername'] = 'Smart media';
-$string['privacy:metadata'] = 'The Smart media plugin does not store any personal data.';
-
 $string['download'] = 'Download original file';
 $string['downloadmetadata'] = 'Download file metadata';
-$string['pending'] = 'Media conversion pending...';
 $string['enableplaceholder'] = 'Enable placeholder';
 $string['enableplaceholder_desc'] = 'When enabled a placeholder image will be displayed until smartmedia conversion completes';
+$string['filtername'] = 'Smart media';
+$string['pending'] = 'Media conversion pending...';
+$string['pluginname'] = 'Smart Media';
+
+$string['privacy:metadata'] = 'The Smart media plugin does not store any personal data.';
+
 $string['smartmedia:viewsource'] = 'View source media';
 $string['viewoptimised'] = 'View optimised media';
 $string['viewsource'] = 'View source media';

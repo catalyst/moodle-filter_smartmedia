@@ -7,6 +7,5 @@ jobs:
   ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
     with:
-      extra_plugin_runners: 'moodle-plugin-ci add-plugin catalyst/moodle-local_aws; moodle-plugin-ci add-plugin  --branch MOODLE_401_STABLE catalyst/moodle-local_smartmedia'
+      extra_plugin_runners: 'moodle-plugin-ci add-plugin --branch MOODLE_405_STABLE catalyst/moodle-local_smartmedia'
       disable_phpcpd: true
-      disable_phpdoc: true

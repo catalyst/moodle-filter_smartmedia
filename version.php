@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'filter_smartmedia';
-$plugin->release = '2021111503';
-$plugin->version = 2021111503;
-$plugin->supported = [401, 501];
-$plugin->requires = 2018051700;
+$plugin->release = 2025061300;
+$plugin->version = 2025061300;
+$plugin->supported = [405, 405];
+$plugin->requires = 2024100700; // 4.5
 $plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array(
-    'local_smartmedia' => 2019110500
-);
+$plugin->dependencies = [
+    'local_smartmedia' => 2025061300,
+];

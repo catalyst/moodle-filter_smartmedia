@@ -14,15 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Unit test for the filter_smartmedia
- *
- * @package    filter_smartmedia
- * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+use core\plugininfo\media;
+use core\url;
+use core\output\html_writer;
+use core\context\system;
+use core\context\course;
+use core\context\module;
+use local_smartmedia\conversion;
 
-use \local_smartmedia\conversion;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -35,12 +34,13 @@ require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the co
  * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class filter_smartmedia_testcase extends advanced_testcase {
+final class filter_test extends advanced_testcase {
 
     /*
      * Set up method for this test suite.
      */
     public function setUp(): void {
+        parent::setUp();
         $this->resetAfterTest(true);
         set_config('api_region', 'ap-southeast-2', 'local_smartmedia');
         set_config('api_key', 'somefakekey', 'local_smartmedia');
@@ -60,10 +60,10 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * Test the video.js enabled method returns true.
      */
-    public function test_videojs_enabled_true() {
+    public function test_videojs_enabled_true(): void {
         $this->resetAfterTest(true);
 
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
@@ -76,13 +76,13 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * Test the video.js enabled method returns false.
      */
-    public function test_videojs_enabled_false() {
+    public function test_videojs_enabled_false(): void {
         $this->resetAfterTest(true);
 
         // Only enable the HTML5 video player not video.js.
-        \core\plugininfo\media::set_enabled_plugins('html5video');
+        media::set_enabled_plugins('html5video');
 
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
@@ -96,9 +96,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * Test method that gets smart media elements.
      * The href in htis test has no smart media elements available.
      */
-    public function test_get_smart_elements_no_smart() {
+    public function test_get_smart_elements_no_smart(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
 
@@ -111,21 +111,21 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEmpty($proxy);
     }
 
-    public function test_get_embed_markup_simple() {
+    public function test_get_embed_markup_simple(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/OriginalVideo.mp4';
-        $urls = array(new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8'));
-        $options = array(
+        $urls = [new url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8')];
+        $options = [
             'width' => '',
             'height' => '',
-            'name' => ''
-        );
-        $download = array(
-            new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4'),
-            new \moodle_url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp3'),
-        );
+            'name' => '',
+        ];
+        $download = [
+            new url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4'),
+            new url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp3'),
+        ];
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
@@ -142,9 +142,9 @@ class filter_smartmedia_testcase extends advanced_testcase {
      * There is no valid tags to replace.
      * Output next should be the same as input text.
      */
-    public function test_filter_smartmedia_filter_no_replace() {
+    public function test_filter_smartmedia_filter_no_replace(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         $inputtext = '<div class="no-overflow">'
             .'<a href="#">Some test data</a>'
@@ -158,11 +158,11 @@ class filter_smartmedia_testcase extends advanced_testcase {
     /**
      * Test method that gets smart media placeholder markup.
      */
-    public function test_get_placeholder_markkup() {
+    public function test_get_placeholder_markkup(): void {
         $this->resetAfterTest(true);
 
         global $DB;
-        $filterplugin = new filter_smartmedia(null, array());
+        $filterplugin = new filter_smartmedia(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.avi';
         $fulltext = '<div class="no-overflow">'
@@ -179,28 +179,28 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $fs = new file_storage();
 
         // Mock the initial file record from which conversions were made.
-        $initialfilerecord = array (
+        $initialfilerecord = [
             'contextid' => 31,
             'component' => 'mod_forum',
             'filearea' => 'attachment',
             'itemid' => 2,
             'filepath' => '/',
-            'filename' => 'myfile1.avi');
+            'filename' => 'myfile1.avi'];
         $initialfile = $fs->create_file_from_string($initialfilerecord, 'the first test file');
         $contenthash = $initialfile->get_contenthash();
 
-        $initialfilerecord2 = array (
+        $initialfilerecord2 = [
             'contextid' => 31,
             'component' => 'mod_forum',
             'filearea' => 'attachment',
             'itemid' => 3,
             'filepath' => '/',
-            'filename' => 'myfile2.MOV');
+            'filename' => 'myfile2.MOV'];
         $initialfile2 = $fs->create_file_from_string($initialfilerecord2, 'the second test file');
         $contenthash2 = $initialfile2->get_contenthash();
 
         // Add a successful conversion status for this file.
-        $conversionrecord = new \stdClass();
+        $conversionrecord = new stdClass();
         $conversionrecord->pathnamehash = $contenthash;
         $conversionrecord->contenthash = $contenthash;
         $conversionrecord->status = 201;
@@ -215,7 +215,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $conversionrecord->timecreated = time();
         $conversionrecord->timemodified = time();
 
-        $conversionrecord2 = new \stdClass();
+        $conversionrecord2 = new stdClass();
         $conversionrecord2->pathnamehash = $contenthash2;
         $conversionrecord2->contenthash = $contenthash2;
         $conversionrecord2->status = 201;
@@ -230,11 +230,11 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $conversionrecord2->timecreated = time();
         $conversionrecord2->timemodified = time();
 
-        $href = moodle_url::make_pluginfile_url(
+        $href = url::make_pluginfile_url(
             $initialfilerecord['contextid'], $initialfilerecord['component'], $initialfilerecord['filearea'],
             $initialfilerecord['itemid'], $initialfilerecord['filepath'], $initialfilerecord['filename']);
 
-        $href2 = moodle_url::make_pluginfile_url(
+        $href2 = url::make_pluginfile_url(
             $initialfilerecord2['contextid'], $initialfilerecord2['component'], $initialfilerecord2['filearea'],
             $initialfilerecord2['itemid'], $initialfilerecord2['filepath'], $initialfilerecord2['filename']);
 
@@ -299,7 +299,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a>, Legit video link via webservice url in system context.
             [
@@ -308,7 +308,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/lib/ajax/service.php',
-                'system'
+                'system',
             ],
             // Test <a>, Legit video link via webservice url in course context.
             [
@@ -317,7 +317,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/lib/ajax/service.php',
-                'course'
+                'course',
             ],
             // Test <a>, Legit video link via webservice url in module context.
             [
@@ -326,7 +326,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/lib/ajax/service.php',
-                'module'
+                'module',
             ],
             // Test <a>, Legit video link via webservice url in course context.
             [
@@ -335,7 +335,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/lib/ajax/service.php',
-                'course'
+                'course',
             ],
             // Test <a>, Legit video link via course url.
             [
@@ -344,7 +344,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/course/view.php?id=:courseid',
-                'course'
+                'course',
             ],
             // Test <a>, Legit video link via module url.
             [
@@ -353,7 +353,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/mod/forum/view.php?id=:cmid',
-                'module'
+                'module',
             ],
             // Test <a>, Not supported extension.
             [
@@ -362,7 +362,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 0,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a>, Not a pluginfile.
             [
@@ -371,7 +371,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 0,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a>, 2 legit links.
             [
@@ -381,7 +381,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 2,
                 2,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a>, 1 legit, 1 not.
             [
@@ -391,7 +391,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/my/',
-                'system'
+                'system',
 
             ],
             // Test <video>, legit element.
@@ -401,7 +401,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <video>, bad extension.
             [
@@ -410,7 +410,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <video>, not a pluginfile.
             [
@@ -419,7 +419,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 1,
                 1,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <video>, 2 legit elements.
             [
@@ -429,7 +429,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 2,
                 2,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <video> then <a>, 2 legit elements.
             [
@@ -439,7 +439,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 2,
                 2,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a> then <video>, 2 legit elements.
             [
@@ -449,7 +449,7 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 2,
                 2,
                 '/my/',
-                'system'
+                'system',
             ],
             // Test <a> then <video>, 2 legit elements and one naughty.
             [
@@ -460,15 +460,22 @@ class filter_smartmedia_testcase extends advanced_testcase {
                 2,
                 3,
                 '/my/',
-                'system'
+                'system',
             ],
         ];
     }
 
     /**
+     * Test filter replacement
+     * @param string $text
+     * @param string $regex
+     * @param int $matchcount
+     * @param int $mediaplugincount
+     * @param string $pageurl
+     * @param string $contextkey
      * @dataProvider test_filter_replace_dataprovider
      */
-    public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey) {
+    public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey): void {
         global $PAGE;
 
         $this->resetAfterTest();
@@ -486,28 +493,28 @@ class filter_smartmedia_testcase extends advanced_testcase {
 
         switch($contextkey) {
             case 'system':
-                $PAGE->set_context(\context_system::instance());
+                $PAGE->set_context(system::instance());
                 break;
             case 'course':
-                $PAGE->set_context(\context_course::instance($course->id));
+                $PAGE->set_context(course::instance($course->id));
                 break;
             case 'module':
-                $PAGE->set_context(\context_module::instance($module->cmid));
+                $PAGE->set_context(module::instance($module->cmid));
                 break;
         }
 
         $conversion = $this->createMock(conversion::class);
         $conversion->method('get_smart_media')->willReturn([
             'media' => [
-                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+                url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4'),
             ],
             'data' => [],
             'download' => [],
-            'context' => $PAGE->context
+            'context' => $PAGE->context,
         ]);
-        $PAGE->set_url(new moodle_url($pageurl));
+        $PAGE->set_url(new url($pageurl));
 
-        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $filterplugin = new filter_smartmedia(null, [], $conversion);
         $result = $filterplugin->filter($text);
         $this->assertEquals($matchcount, preg_match_all($regex, $result));
 
@@ -523,47 +530,47 @@ class filter_smartmedia_testcase extends advanced_testcase {
         $this->assertEquals(count($matches[0]), $mediaplugincount);
     }
 
-    public function test_view_source() {
+    public function test_view_source(): void {
         global $PAGE;
         $this->setAdminUser();
 
         $conversion = $this->createMock(conversion::class);
         $conversion->method('get_smart_media')->willReturn([
             'media' => [
-                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+                url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4'),
             ],
             'data' => [],
             'download' => [],
-            'context' => \context::instance_by_id(1)
+            'context' => context::instance_by_id(1),
         ]);
-        $PAGE->set_url(new moodle_url("/my/"));
+        $PAGE->set_url(new url("/my/"));
 
-        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $filterplugin = new filter_smartmedia(null, [], $conversion);
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View source media.*<\/button>/', $result);
     }
 
-    public function test_view_optimised() {
+    public function test_view_optimised(): void {
         global $PAGE, $SESSION;
         $this->setAdminUser();
 
         $conversion = $this->createMock(conversion::class);
         $conversion->method('get_smart_media')->willReturn([
             'media' => [
-                \moodle_url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4')
+                url::make_pluginfile_url('1', 'local_smartmedia', 'test', '1', 'fake/path', 'fakename.mp4'),
             ],
             'data' => [],
             'download' => [],
-            'context' => \context::instance_by_id(1)
+            'context' => context::instance_by_id(1),
         ]);
-        $PAGE->set_url(new moodle_url("/my/"));
+        $PAGE->set_url(new url("/my/"));
 
         // Setup condition to view source.
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $SESSION->local_smartmedia_viewsource = [sha1('url.com/pluginfile.php/fake.mp4') => true];
 
-        $filterplugin = new filter_smartmedia(null, array(), $conversion);
+        $filterplugin = new filter_smartmedia(null, [], $conversion);
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View optimised media.*<\/button>/', $result);
     }
