@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/catalyst/moodle-filter_smartmedia.svg?branch=master)](https://travis-ci.org/catalyst/moodle-filter_smartmedia)
-
 # Smart Media Filter #
 
 Smart media aims to enhance Moodle's processing and delivery of multimedia while simplifying the process of managing multimedia for teachers and students.
@@ -11,7 +9,7 @@ The Smart Media Filter (this plugin) works to help display smart media content i
 ## Supported Moodle Versions
 This plugin currently supports Moodle:
 
-* 3.9
+* 4.5
 
 ## Plugin Installation ##
 

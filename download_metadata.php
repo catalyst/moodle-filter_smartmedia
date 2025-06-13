@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use core\url;
+use local_smartmedia\aws_api;
+use local_smartmedia\aws_elastic_transcoder;
+use local_smartmedia\conversion;
+
 /**
  *  Smart media metadata download portal.
  *
@@ -28,13 +33,13 @@ confirm_sesskey();
 
 $conv = required_param('conv', PARAM_TEXT);
 $titleraw = required_param('title', PARAM_TEXT);
-$convurl = new moodle_url(base64_decode($conv));
+$convurl = new url(base64_decode($conv));
 $title = base64_decode($titleraw);
 
 // Get smartmedia elements.
-$api = new \local_smartmedia\aws_api();
-$transcoder = new \local_smartmedia\aws_elastic_transcoder($api->create_elastic_transcoder_client());
-$conversion = new \local_smartmedia\conversion($transcoder);
+$api = new aws_api();
+$transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+$conversion = new conversion($transcoder);
 // Get files instead of raw urls.
 $smartmedia = $conversion->get_smart_media($convurl, false, true);
 

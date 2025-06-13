@@ -14,18 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- *  Smart media filtering
- *
- *  This filter will replace any links to a compatible media file with
- *  a smart media plugin that plays that media inline and uses AI/ML
- *  techniques to improve user experience.
- *
- * @package    filter_smartmedia
- * @copyright   2019 Matt Porritt <mattp@catalyst-au.net>V
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
+use local_smartmedia\conversion;
+use core\plugininfo\media;
+use core\url;
+use core\output\html_writer;
+use core\context\module;
+use core\context\course;
 use local_smartmedia\aws_api;
 use local_smartmedia\aws_elastic_transcoder;
 
@@ -62,7 +56,7 @@ class filter_smartmedia extends moodle_text_filter {
     /**
      * Enabled status of the video JS player.
      *
-     * @var integer
+     * @var int
      */
     private $videojsenabled = self::VIDEOJS_ENABLED_NOT_SET;
 
@@ -131,7 +125,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param context $context The current context.
      * @param array $localconfig Any context-specific configuration for this filter.
      */
-    public function __construct($context, array $localconfig, \local_smartmedia\conversion $conversion = null) {
+    public function __construct($context, array $localconfig, conversion $conversion = null) {
         parent::__construct($context, $localconfig);
 
         if (!empty($conversion)) {
@@ -139,7 +133,7 @@ class filter_smartmedia extends moodle_text_filter {
         } else {
             $api = new aws_api();
             $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
-            $this->conversion = new \local_smartmedia\conversion($transcoder);
+            $this->conversion = new conversion($transcoder);
         }
     }
 
@@ -176,7 +170,7 @@ class filter_smartmedia extends moodle_text_filter {
         if ($this->videojsenabled == self::VIDEOJS_ENABLED_NOT_SET) {
             // If we haven't already determined Videjos plugin enabled status
             // do so now.
-            $enabledplayes = \core\plugininfo\media::get_enabled_plugins();
+            $enabledplayes = media::get_enabled_plugins();
             if (in_array('videojs', $enabledplayes) && class_exists('media_videojs_plugin')) {
                 $this->videojsenabled = self::VIDEOJS_ENABLED;
             } else {
@@ -193,7 +187,7 @@ class filter_smartmedia extends moodle_text_filter {
      *
      * @return string $typestring String of supported types.
      */
-    private function get_browser_native_types() : string {
+    private function get_browser_native_types(): string {
         $typestring = '\\'. implode('|\\', $this->browsernative);
 
         return $typestring;
@@ -206,11 +200,11 @@ class filter_smartmedia extends moodle_text_filter {
      * @param string $linkhref The href to the source file.
      * @return array $elements The smart media elements to embed.
      */
-    private function get_smart_elements(string $linkhref) : array {
+    private function get_smart_elements(string $linkhref): array {
         $urls = [];
         $options = [];
         $elements = [];
-        $moodleurl = new \moodle_url($linkhref);
+        $moodleurl = new url($linkhref);
 
         $smartmedia = $this->conversion->get_smart_media($moodleurl);
 
@@ -241,7 +235,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param string $needle The string to search for.
      * @return bool Result of string check.
      */
-    private function string_ends_with(string $haystack, string $needle) : bool {
+    private function string_ends_with(string $haystack, string $needle): bool {
         $length = strlen($needle);
         if ($length == 0) {
             return true;
@@ -261,7 +255,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param bool $hasdata Whether there is metadata associated with this smartmedia.
      * @return string $newtext Rendered VideoJS markup.
      */
-    private function get_embed_markup(string $linkhref, array $urls, array $options, array $download, bool $hasdata) : string {
+    private function get_embed_markup(string $linkhref, array $urls, array $options, array $download, bool $hasdata): string {
         global $OUTPUT;
 
         $name = $options['name'];
@@ -270,7 +264,7 @@ class filter_smartmedia extends moodle_text_filter {
         $embedoptions = [];
         $downloaddata = '<video ';
 
-        $videojs = new \media_videojs_plugin();
+        $videojs = new media_videojs_plugin();
         $newtext = $videojs->embed($urls, $name, $width, $height, $embedoptions);
         // TODO: Deal with fallback link.
 
@@ -315,7 +309,7 @@ class filter_smartmedia extends moodle_text_filter {
             // Explode the url to get the filename component for naming.
             $components = explode('/', $linkhref);
             $newtext .= $OUTPUT->single_button(
-                new moodle_url('/filter/smartmedia/download_metadata.php', [
+                new url('/filter/smartmedia/download_metadata.php', [
                     'sesskey' => sesskey(),
                     'conv' => base64_encode($linkhref),
                     'title' => base64_encode(end($components)),
@@ -335,9 +329,9 @@ class filter_smartmedia extends moodle_text_filter {
      * @param string $fulltext The full text of the element.
      * @return string $markup The placeholder markup.
      */
-    private function get_placeholder_markup(string $linkhref, string $fulltext) : string {
+    private function get_placeholder_markup(string $linkhref, string $fulltext): string {
         global $OUTPUT;
-        $moodleurl = new \moodle_url($linkhref);
+        $moodleurl = new url($linkhref);
         $path = $moodleurl->get_path();
         $args = explode('/', $path);
         $filename = array_pop($args);
@@ -349,7 +343,7 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         $markup = $fulltext;
-        $context = new \stdClass();
+        $context = new stdClass();
 
         // If file is of type that is browser native,
         // don't show placeholder.
@@ -379,7 +373,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param array $matches An array of link matches.
      * @return array Array of newtext and whether the text was replaced
      */
-    private function replace($target, $fulltext) : array {
+    private function replace($target, $fulltext): array {
         global $OUTPUT, $SESSION;
 
         list($context, $elements) = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
@@ -390,7 +384,7 @@ class filter_smartmedia extends moodle_text_filter {
             // The placeholder should only be displayed if this file will actually be converted.
             // We need to verify that the file will be queued for conversion.
             // Timecreated check.
-            $file = $this->conversion->get_file_from_url(new \moodle_url($target));
+            $file = $this->conversion->get_file_from_url(new url($target));
             if (!empty($file) && $file->get_timecreated() < time() - $lookback) {
                 $placeholder = false;
             }
@@ -421,12 +415,12 @@ class filter_smartmedia extends moodle_text_filter {
                 if ($usesource && has_capability('filter/smartmedia:viewsource', $context)) {
                     // Return the original markup, along with a button to swap back to smartmedia.
                     $url->param('sm', $current);
-                    $button = new \single_button(
+                    $button = new single_button(
                         $url,
                         get_string('viewoptimised', 'filter_smartmedia'),
                         'get'
                     );
-                    $button = \html_writer::div($OUTPUT->render($button), 'local-smartmedia-view-optimised');
+                    $button = html_writer::div($OUTPUT->render($button), 'local-smartmedia-view-optimised');
 
                     // Output the original source media and return.
                     if (!array_key_exists($current, $viewsource)) {
@@ -439,7 +433,7 @@ class filter_smartmedia extends moodle_text_filter {
                     $fulltext = str_replace('&nbsp;', '', $fulltext);
 
                     // Put in the smartmedia wrapper to keep styling consistent.
-                    $html = \html_writer::div($fulltext . $button, 'local-smartmedia-wrapper');
+                    $html = html_writer::div($fulltext . $button, 'local-smartmedia-wrapper');
                     return [$html, false];
                 }
                 // Now store the state back into the session.
@@ -459,20 +453,20 @@ class filter_smartmedia extends moodle_text_filter {
             if (has_capability('filter/smartmedia:viewsource', $context)) {
                 // Add a button to view source.
                 $url->param('source', $current);
-                $button = new \single_button(
+                $button = new single_button(
                     $url,
                     get_string('viewsource', 'filter_smartmedia'),
                     'get'
                 );
                 // Wrap just smartmedia content inside a wrapper div for styling targeting.
-                $replacedlink = \html_writer::div($replacedlink . $OUTPUT->render($button), 'local-smartmedia-wrapper');
+                $replacedlink = html_writer::div($replacedlink . $OUTPUT->render($button), 'local-smartmedia-wrapper');
             } else {
-                $replacedlink = \html_writer::div($replacedlink, 'local-smartmedia-wrapper');
+                $replacedlink = html_writer::div($replacedlink, 'local-smartmedia-wrapper');
             }
             $replaced = true;
         } else if ($placeholder) {
             // If no smartmedia found add the correct placeholder markup.
-            $replacedlink = \html_writer::div($this->get_placeholder_markup($target, $fulltext), 'local-smartmedia-wrapper');
+            $replacedlink = html_writer::div($this->get_placeholder_markup($target, $fulltext), 'local-smartmedia-wrapper');
             $replaced = true;
         } else {
             // Do nothing, no replacement candidate.
@@ -487,7 +481,7 @@ class filter_smartmedia extends moodle_text_filter {
      * Gets the course/page url from the context.
      *
      * @param context $context
-     * @return moodle_url $url
+     * @return \core\url $url
      */
     private function url_from_context($context) {
         global $PAGE;
@@ -499,11 +493,11 @@ class filter_smartmedia extends moodle_text_filter {
         $course = null;
         $cm = null;
 
-        if ($context instanceof \context_module) {
+        if ($context instanceof module) {
             list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
         }
 
-        if ($context instanceof \context_course) {
+        if ($context instanceof course) {
             $course = get_course($context->instanceid);
         }
 
@@ -512,7 +506,7 @@ class filter_smartmedia extends moodle_text_filter {
 
         // Start with course, as its the most likely to exist.
         if ($isajax && !empty($course)) {
-            $url = new moodle_url('/course/view.php', ['id' => $course->id]);
+            $url = new url('/course/view.php', ['id' => $course->id]);
         }
 
         // Then check the course module has a URL, if so then use that instead.
@@ -521,7 +515,7 @@ class filter_smartmedia extends moodle_text_filter {
         }
 
         // Setup a page anchor if on the course page and viewing a section.
-        if ($context instanceof \context_module && strpos($url, '/course/view.php') !== false && !empty($cm)) {
+        if ($context instanceof module && strpos($url, '/course/view.php') !== false && !empty($cm)) {
             $url->set_anchor('section-' . $cm->sectionnum);
         }
 
@@ -657,7 +651,7 @@ class filter_smartmedia extends moodle_text_filter {
                     if ($link->isSameNode($newlink)) {
                         $exists = true;
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     // Some error, likely when the $link is no longer a valid DOMElement.
                     continue;
                 }
