@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace filter_smartmedia;
+
 use local_smartmedia\conversion;
 use core\plugininfo\media;
 use core\url;
@@ -22,6 +24,13 @@ use core\context\module;
 use core\context\course;
 use local_smartmedia\aws_api;
 use local_smartmedia\aws_elastic_transcoder;
+use core_media_manager;
+use core_media_player_native;
+use media_videojs_plugin;
+use DOMDocument;
+use DOMXPath;
+use stdClass;
+use core\output\single_button;
 
 /**
  * Automatic smart media embedding filter class.
@@ -30,7 +39,7 @@ use local_smartmedia\aws_elastic_transcoder;
  * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class filter_smartmedia extends moodle_text_filter {
+class text_filter extends \core_filters\text_filter {
 
     /**
      * Video.js plugin enabled status not set.
@@ -126,7 +135,7 @@ class filter_smartmedia extends moodle_text_filter {
      * @param array $localconfig Any context-specific configuration for this filter.
      * @param conversion|null $conversion
      */
-    public function __construct($context, array $localconfig, conversion $conversion = null) {
+    public function __construct($context, array $localconfig, ?conversion $conversion = null) {
         parent::__construct($context, $localconfig);
 
         if (!empty($conversion)) {
@@ -576,7 +585,7 @@ class filter_smartmedia extends moodle_text_filter {
         // Add a wrapping div so DOMDocument doesnt mangle the structure.
         $loadtext = '<div>' . $text . '</div>';
         // Ensure the encoding can be loaded by the domdoc.
-        $loadtext = mb_convert_encoding($loadtext, 'HTML-ENTITIES', 'UTF-8');
+        $loadtext = html_entity_decode($loadtext);
 
         // Supress warnings. HTML5 nodes currently throw warnings.
         // Use flags to prevent html and body tags from being included.
@@ -609,7 +618,7 @@ class filter_smartmedia extends moodle_text_filter {
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
-            $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
+            $newtext = html_entity_decode($newtext);
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
@@ -653,7 +662,7 @@ class filter_smartmedia extends moodle_text_filter {
                     if ($link->isSameNode($newlink)) {
                         $exists = true;
                     }
-                } catch (Throwable $e) {
+                } catch (\Throwable $e) {
                     // Some error, likely when the $link is no longer a valid DOMElement.
                     continue;
                 }
@@ -679,7 +688,7 @@ class filter_smartmedia extends moodle_text_filter {
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
-            $newtext = mb_convert_encoding($newtext, 'HTML-ENTITIES', 'UTF-8');
+            $newtext = html_entity_decode($newtext);
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');

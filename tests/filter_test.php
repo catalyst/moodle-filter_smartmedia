@@ -21,14 +21,14 @@ use core\context\system;
 use core\context\course;
 use core\context\module;
 use local_smartmedia\conversion;
+use filter_smartmedia\text_filter;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/filter/smartmedia/filter.php'); // Include the code to test.
 
 /**
- * Unit test for the filter_smartmedia
+ * Unit test for the text_filter
  *
  * @package    filter_smartmedia
  * @copyright  2019 Matt Porritt <mattp@catalyst-au.net>
@@ -63,10 +63,10 @@ final class filter_test extends advanced_testcase {
     public function test_videojs_enabled_true(): void {
         $this->resetAfterTest(true);
 
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
+        $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'videojs_enabled');
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin); // Get result of invoked method.
 
@@ -82,10 +82,10 @@ final class filter_test extends advanced_testcase {
         // Only enable the HTML5 video player not video.js.
         media::set_enabled_plugins('html5video');
 
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'videojs_enabled');
+        $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'videojs_enabled');
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin); // Get result of invoked method.
 
@@ -98,12 +98,12 @@ final class filter_test extends advanced_testcase {
      */
     public function test_get_smart_elements_no_smart(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'get_smart_elements');
+        $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'get_smart_elements');
         $method->setAccessible(true); // Allow accessing of private method.
         list($context, $proxy) = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
 
@@ -113,7 +113,7 @@ final class filter_test extends advanced_testcase {
 
     public function test_get_embed_markup_simple(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/OriginalVideo.mp4';
         $urls = [new url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8')];
@@ -128,7 +128,7 @@ final class filter_test extends advanced_testcase {
         ];
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'get_embed_markup');
+        $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'get_embed_markup');
         $method->setAccessible(true); // Allow accessing of private method.
         $proxy = $method->invoke($filterplugin, $linkhref, $urls, $options, $download, false); // Get result of invoked method.
 
@@ -142,9 +142,9 @@ final class filter_test extends advanced_testcase {
      * There is no valid tags to replace.
      * Output next should be the same as input text.
      */
-    public function test_filter_smartmedia_filter_no_replace(): void {
+    public function test_text_filter_filter_no_replace(): void {
         $this->resetAfterTest(true);
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         $inputtext = '<div class="no-overflow">'
             .'<a href="#">Some test data</a>'
@@ -162,7 +162,7 @@ final class filter_test extends advanced_testcase {
         $this->resetAfterTest(true);
 
         global $DB;
-        $filterplugin = new filter_smartmedia(null, []);
+        $filterplugin = new text_filter(null, []);
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.avi';
         $fulltext = '<div class="no-overflow">'
@@ -239,7 +239,7 @@ final class filter_test extends advanced_testcase {
             $initialfilerecord2['itemid'], $initialfilerecord2['filepath'], $initialfilerecord2['filename']);
 
         // We're testing a private method, so we need to setup reflector magic.
-        $method = new ReflectionMethod('filter_smartmedia', 'get_placeholder_markup');
+        $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'get_placeholder_markup');
         $method->setAccessible(true); // Allow accessing of private method.
 
         $proxy = $method->invoke($filterplugin, $linkhref, $fulltext); // Get result of invoked method.
@@ -514,7 +514,7 @@ final class filter_test extends advanced_testcase {
         ]);
         $PAGE->set_url(new url($pageurl));
 
-        $filterplugin = new filter_smartmedia(null, [], $conversion);
+        $filterplugin = new text_filter(null, [], $conversion);
         $result = $filterplugin->filter($text);
         $this->assertEquals($matchcount, preg_match_all($regex, $result));
 
@@ -545,7 +545,7 @@ final class filter_test extends advanced_testcase {
         ]);
         $PAGE->set_url(new url("/my/"));
 
-        $filterplugin = new filter_smartmedia(null, [], $conversion);
+        $filterplugin = new text_filter(null, [], $conversion);
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View source media.*<\/button>/', $result);
@@ -570,7 +570,7 @@ final class filter_test extends advanced_testcase {
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $SESSION->local_smartmedia_viewsource = [sha1('url.com/pluginfile.php/fake.mp4') => true];
 
-        $filterplugin = new filter_smartmedia(null, [], $conversion);
+        $filterplugin = new text_filter(null, [], $conversion);
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View optimised media.*<\/button>/', $result);
     }
