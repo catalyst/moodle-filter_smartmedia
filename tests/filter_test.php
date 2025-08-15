@@ -64,6 +64,7 @@ final class filter_test extends advanced_testcase {
         $this->resetAfterTest(true);
 
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'videojs_enabled');
@@ -83,6 +84,7 @@ final class filter_test extends advanced_testcase {
         media::set_enabled_plugins('html5video');
 
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'videojs_enabled');
@@ -99,6 +101,7 @@ final class filter_test extends advanced_testcase {
     public function test_get_smart_elements_no_smart(): void {
         $this->resetAfterTest(true);
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.mp4';
 
@@ -114,6 +117,7 @@ final class filter_test extends advanced_testcase {
     public function test_get_embed_markup_simple(): void {
         $this->resetAfterTest(true);
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/OriginalVideo.mp4';
         $urls = [new url('http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.m3u8')];
@@ -145,7 +149,9 @@ final class filter_test extends advanced_testcase {
     public function test_text_filter_filter_no_replace(): void {
         $this->resetAfterTest(true);
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
+        $this->resetDebugging();
         $inputtext = '<div class="no-overflow">'
             .'<a href="#">Some test data</a>'
             .'<a href="#">Some other test data</a>'
@@ -163,6 +169,7 @@ final class filter_test extends advanced_testcase {
 
         global $DB;
         $filterplugin = new text_filter(null, []);
+        $this->resetDebugging();
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.avi';
         $fulltext = '<div class="no-overflow">'
@@ -515,6 +522,7 @@ final class filter_test extends advanced_testcase {
         $PAGE->set_url(new url($pageurl));
 
         $filterplugin = new text_filter(null, [], $conversion);
+        $this->resetDebugging();
         $result = $filterplugin->filter($text);
         $this->assertEquals($matchcount, preg_match_all($regex, $result));
 
@@ -546,6 +554,7 @@ final class filter_test extends advanced_testcase {
         $PAGE->set_url(new url("/my/"));
 
         $filterplugin = new text_filter(null, [], $conversion);
+        $this->resetDebugging();
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View source media.*<\/button>/', $result);
@@ -571,6 +580,7 @@ final class filter_test extends advanced_testcase {
         $SESSION->local_smartmedia_viewsource = [sha1('url.com/pluginfile.php/fake.mp4') => true];
 
         $filterplugin = new text_filter(null, [], $conversion);
+        $this->resetDebugging();
         $result = $filterplugin->filter($text);
         $this->assertMatchesRegularExpression('/<button.*View optimised media.*<\/button>/', $result);
     }
