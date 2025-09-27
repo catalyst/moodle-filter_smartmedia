@@ -585,7 +585,7 @@ class text_filter extends \core_filters\text_filter {
         // Add a wrapping div so DOMDocument doesnt mangle the structure.
         $loadtext = '<div>' . $text . '</div>';
         // Ensure the encoding can be loaded by the domdoc.
-        $loadtext = mb_encode_numericentity($loadtext, [0xa0, 0xffff, 0, 0xffff], 'UTF-8', true);
+        $loadtext = mb_encode_numericentity($loadtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');;
 
         // Supress warnings. HTML5 nodes currently throw warnings.
         // Use flags to prevent html and body tags from being included.
@@ -618,7 +618,7 @@ class text_filter extends \core_filters\text_filter {
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
-            $newtext = mb_encode_numericentity($newtext, [0xa0, 0xffff, 0, 0xffff], 'UTF-8', true);
+            $newtext = mb_encode_numericentity($newtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');;
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
@@ -688,7 +688,7 @@ class text_filter extends \core_filters\text_filter {
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
-            $newtext = mb_encode_numericentity($newtext, [0xa0, 0xffff, 0, 0xffff], 'UTF-8', true);
+            $newtext = mb_encode_numericentity($newtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
