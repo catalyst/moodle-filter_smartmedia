@@ -23,7 +23,6 @@ use core\output\html_writer;
 use core\context\module;
 use core\context\course;
 use local_smartmedia\aws_api;
-use local_smartmedia\aws_elastic_transcoder;
 use core_media_manager;
 use core_media_player_native;
 use media_videojs_plugin;
@@ -31,6 +30,7 @@ use DOMDocument;
 use DOMXPath;
 use stdClass;
 use core\output\single_button;
+use local_smartmedia\aws_media_convert;
 
 /**
  * Automatic smart media embedding filter class.
@@ -142,8 +142,8 @@ class text_filter extends \core_filters\text_filter {
             $this->conversion = $conversion;
         } else {
             $api = new aws_api();
-            $transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
-            $this->conversion = new conversion($transcoder);
+            $mediaconvert = new aws_media_convert($api->create_media_convert_client());
+            $this->conversion = new conversion($mediaconvert);
         }
     }
 
