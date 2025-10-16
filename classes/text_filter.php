@@ -239,22 +239,6 @@ class text_filter extends \core_filters\text_filter {
     }
 
     /**
-     * Check if string ends with.
-     *
-     * @param string $haystack The string to search in.
-     * @param string $needle The string to search for.
-     * @return bool Result of string check.
-     */
-    private function string_ends_with(string $haystack, string $needle): bool {
-        $length = strlen($needle);
-        if ($length == 0) {
-            return true;
-        }
-
-        return (substr($haystack, -$length) === $needle);
-    }
-
-    /**
      * Given an array of Moodle URLs and an array of options,
      * return the VideoJS markup.
      *
@@ -305,9 +289,9 @@ class text_filter extends \core_filters\text_filter {
         // Add download URLs as data to the video tag.
         if (!empty($download)) {
             foreach ($download as $url) {
-                if ($this->string_ends_with($url->out(), '.mp4')) {
+                if (str_ends_with($url->out(), '.mp4')) {
                     $downloaddata .= 'data-download-video="' . $url->out(true, ['forcedownload' => true]). '" ';
-                } else if ($this->string_ends_with($url->out(), '.mp3')) {
+                } else if (str_ends_with($url->out(), '.mp3')) {
                     $downloaddata .= 'data-download-audio="' . $url->out(true, ['forcedownload' => true]). '" ';
                 }
             }
