@@ -24,7 +24,7 @@
 
 use core\url;
 use local_smartmedia\aws_api;
-use local_smartmedia\aws_elastic_transcoder;
+use local_smartmedia\aws_media_convert;
 use local_smartmedia\conversion;
 
 require_once(__DIR__ . '/../../config.php');
@@ -38,7 +38,7 @@ $title = base64_decode($titleraw);
 
 // Get smartmedia elements.
 $api = new aws_api();
-$transcoder = new aws_elastic_transcoder($api->create_elastic_transcoder_client());
+$transcoder = new aws_media_convert($api->create_media_convert_client());
 $conversion = new conversion($transcoder);
 // Get files instead of raw urls.
 $smartmedia = $conversion->get_smart_media($convurl, false, true);
