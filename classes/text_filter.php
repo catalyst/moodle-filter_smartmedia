@@ -40,7 +40,6 @@ use local_smartmedia\aws_media_convert;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class text_filter extends \core_filters\text_filter {
-
     /**
      * Video.js plugin enabled status not set.
      *
@@ -186,7 +185,6 @@ class text_filter extends \core_filters\text_filter {
             } else {
                 $this->videojsenabled = self::VIDEOJS_NOT_ENABLED;
             }
-
         }
 
         return $this->videojsenabled;
@@ -198,7 +196,7 @@ class text_filter extends \core_filters\text_filter {
      * @return string $typestring String of supported types.
      */
     private function get_browser_native_types(): string {
-        $typestring = '\\'. implode('|\\', $this->browsernative);
+        $typestring = '\\' . implode('|\\', $this->browsernative);
 
         return $typestring;
     }
@@ -290,9 +288,9 @@ class text_filter extends \core_filters\text_filter {
         if (!empty($download)) {
             foreach ($download as $url) {
                 if (str_ends_with($url->out(), '.mp4')) {
-                    $downloaddata .= 'data-download-video="' . $url->out(true, ['forcedownload' => true]). '" ';
+                    $downloaddata .= 'data-download-video="' . $url->out(true, ['forcedownload' => true]) . '" ';
                 } else if (str_ends_with($url->out(), '.mp3')) {
-                    $downloaddata .= 'data-download-audio="' . $url->out(true, ['forcedownload' => true]). '" ';
+                    $downloaddata .= 'data-download-audio="' . $url->out(true, ['forcedownload' => true]) . '" ';
                 }
             }
             $newtext = preg_replace('/\<video /', $downloaddata, $newtext);
@@ -313,7 +311,6 @@ class text_filter extends \core_filters\text_filter {
         }
 
         return $newtext;
-
     }
 
     /**
@@ -342,7 +339,7 @@ class text_filter extends \core_filters\text_filter {
         // If file is of type that is browser native,
         // don't show placeholder.
         $nativetypes = $this->get_browser_native_types();
-        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $nativetypes .'])[\"\'][^>]*\>\X*?\<\/a\>~';
+        $re = '~\<a\s[^>]*href\=[\"\'](.*pluginfile\.php.*[' . $nativetypes . '])[\"\'][^>]*\>\X*?\<\/a\>~';
         $isnative = preg_match($re, $markup);
         if ($isnative) {
             return $markup;
@@ -371,7 +368,7 @@ class text_filter extends \core_filters\text_filter {
     private function replace($target, $fulltext): array {
         global $OUTPUT, $SESSION;
 
-        list($context, $elements) = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
+        [$context, $elements] = $this->get_smart_elements($target); // Get the smartmedia elements if they exist.
         $placeholder = get_config('filter_smartmedia', 'enableplaceholder');
         $lookback = get_config('local_smartmedia', 'convertfrom');
 
@@ -489,7 +486,7 @@ class text_filter extends \core_filters\text_filter {
         $cm = null;
 
         if ($context instanceof module) {
-            list($course, $cm) = get_course_and_cm_from_cmid($context->instanceid);
+            [$course, $cm] = get_course_and_cm_from_cmid($context->instanceid);
         }
 
         if ($context instanceof course) {
@@ -538,7 +535,7 @@ class text_filter extends \core_filters\text_filter {
         $smparam = optional_param('sm', '', PARAM_TEXT);
 
         // If we have the SM param here, we need to embed and remove from the list.
-        if (array_key_exists($smparam , $viewsource)) {
+        if (array_key_exists($smparam, $viewsource)) {
             unset($viewsource[$smparam]);
         } else if (!array_key_exists($sourceparam, $viewsource)) {
             $viewsource[$sourceparam] = true;
@@ -569,7 +566,8 @@ class text_filter extends \core_filters\text_filter {
         // Add a wrapping div so DOMDocument doesnt mangle the structure.
         $loadtext = '<div>' . $text . '</div>';
         // Ensure the encoding can be loaded by the domdoc.
-        $loadtext = mb_encode_numericentity($loadtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');;
+        $loadtext = mb_encode_numericentity($loadtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
+        ;
 
         // Supress warnings. HTML5 nodes currently throw warnings.
         // Use flags to prevent html and body tags from being included.
@@ -591,18 +589,21 @@ class text_filter extends \core_filters\text_filter {
             // Check if the target media type is compatible.
             $components = explode('/', $target);
             $ext = strtolower(pathinfo(end($components), PATHINFO_EXTENSION));
-            if (stripos($target, 'pluginfile.php') === false ||
-                !in_array($ext, $this->mediatypes)) {
+            if (
+                stripos($target, 'pluginfile.php') === false ||
+                !in_array($ext, $this->mediatypes)
+            ) {
                 continue;
             }
 
             // Get the raw HTML for the replace target.
             $videotext = $originaldom->saveHTML($video);
-            list($newtext, $replaced) = $this->replace($target, $videotext);
+            [$newtext, $replaced] = $this->replace($target, $videotext);
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
-            $newtext = mb_encode_numericentity($newtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');;
+            $newtext = mb_encode_numericentity($newtext, [0x80, 0x10FFFF, 0, 0x1FFFFF], 'UTF-8');
+            ;
 
             // Open that as a new doc to pull the video node out.
             $tempdom = new DOMDocument('1.0', 'UTF-8');
@@ -661,14 +662,16 @@ class text_filter extends \core_filters\text_filter {
             // Check if the target media type is compatible.
             $components = explode('/', $target);
             $ext = pathinfo(end($components), PATHINFO_EXTENSION);
-            if (stripos($target, 'pluginfile.php') === false ||
-                !in_array($ext, $this->mediatypes)) {
+            if (
+                stripos($target, 'pluginfile.php') === false ||
+                !in_array($ext, $this->mediatypes)
+            ) {
                 continue;
             }
 
             // Get the raw HTML for the replace target.
             $linktext = $originaldom->saveHTML($link);
-            list($newtext, $unused) = $this->replace($target, $linktext);
+            [$newtext, $unused] = $this->replace($target, $linktext);
             // Encase in another div to prevent mangling when loading into the new domdoc.
             $newtext = '<div>' . $newtext . '</div>';
             // Encode to the domdocument usable format.
@@ -699,5 +702,4 @@ class text_filter extends \core_filters\text_filter {
 
         return $html;
     }
-
 }
