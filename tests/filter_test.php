@@ -292,8 +292,7 @@ final class filter_test extends advanced_testcase {
         }
     }
 
-
-    public function test_filter_replace_dataprovider() {
+    public static function filter_replace_dataprovider(): array {
         // Return [text, regex to match in output, match count, mediaplugincount, url, contextkey].
         // All <video> must have 2 surrounding divs, which matches the structure of video elements from other plugins.
         // This is then targeted in the node replacement for the filter.
@@ -480,7 +479,7 @@ final class filter_test extends advanced_testcase {
      * @param int $mediaplugincount
      * @param string $pageurl
      * @param string $contextkey
-     * @dataProvider test_filter_replace_dataprovider
+     * @dataProvider filter_replace_dataprovider
      */
     public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey): void {
         global $PAGE;
