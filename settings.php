@@ -29,5 +29,6 @@ if ($ADMIN->fulltree) {
         'filter_smartmedia/enableplaceholder',
         get_string('enableplaceholder', 'filter_smartmedia'),
         get_string('enableplaceholder_desc', 'filter_smartmedia'),
-        1));
+        1
+    ));
 }

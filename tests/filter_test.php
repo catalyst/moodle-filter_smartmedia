@@ -35,7 +35,6 @@ global $CFG;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class filter_test extends advanced_testcase {
-
     /*
      * Set up method for this test suite.
      */
@@ -108,7 +107,7 @@ final class filter_test extends advanced_testcase {
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'get_smart_elements');
         $method->setAccessible(true); // Allow accessing of private method.
-        list($context, $proxy) = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
+        [$context, $proxy] = $method->invoke($filterplugin, $linkhref); // Get result of invoked method.
 
         $this->assertEmpty($context);
         $this->assertEmpty($proxy);
@@ -153,9 +152,9 @@ final class filter_test extends advanced_testcase {
 
         $this->resetDebugging();
         $inputtext = '<div class="no-overflow">'
-            .'<a href="#">Some test data</a>'
-            .'<a href="#">Some other test data</a>'
-            .'</div>';
+            . '<a href="#">Some test data</a>'
+            . '<a href="#">Some other test data</a>'
+            . '</div>';
 
         $outputtext = $filterplugin->filter($inputtext);
         $this->assertEquals($inputtext, $outputtext);
@@ -173,14 +172,14 @@ final class filter_test extends advanced_testcase {
 
         $linkhref = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.avi';
         $fulltext = '<div class="no-overflow">'
-            .'<a href="' . $linkhref . '">' . $linkhref . '</a>'
-            .'</div>';
+            . '<a href="' . $linkhref . '">' . $linkhref . '</a>'
+            . '</div>';
 
         // File with uppercase extension. IOS records video to .MOV for example.
         $linkhref2 = 'http://moodle.local/pluginfile.php/1461/mod_label/intro/SampleVideo1mb.MOV';
         $fulltext2 = '<div class="no-overflow">'
-            .'<a href="' . $linkhref2 . '">' . $linkhref2 . '</a>'
-            .'</div>';
+            . '<a href="' . $linkhref2 . '">' . $linkhref2 . '</a>'
+            . '</div>';
 
         // Setup for testing.
         $fs = new file_storage();
@@ -238,12 +237,22 @@ final class filter_test extends advanced_testcase {
         $conversionrecord2->timemodified = time();
 
         $href = url::make_pluginfile_url(
-            $initialfilerecord['contextid'], $initialfilerecord['component'], $initialfilerecord['filearea'],
-            $initialfilerecord['itemid'], $initialfilerecord['filepath'], $initialfilerecord['filename']);
+            $initialfilerecord['contextid'],
+            $initialfilerecord['component'],
+            $initialfilerecord['filearea'],
+            $initialfilerecord['itemid'],
+            $initialfilerecord['filepath'],
+            $initialfilerecord['filename']
+        );
 
         $href2 = url::make_pluginfile_url(
-            $initialfilerecord2['contextid'], $initialfilerecord2['component'], $initialfilerecord2['filearea'],
-            $initialfilerecord2['itemid'], $initialfilerecord2['filepath'], $initialfilerecord2['filename']);
+            $initialfilerecord2['contextid'],
+            $initialfilerecord2['component'],
+            $initialfilerecord2['filearea'],
+            $initialfilerecord2['itemid'],
+            $initialfilerecord2['filepath'],
+            $initialfilerecord2['filename']
+        );
 
         // We're testing a private method, so we need to setup reflector magic.
         $method = new ReflectionMethod('\filter_smartmedia\text_filter', 'get_placeholder_markup');
@@ -292,8 +301,7 @@ final class filter_test extends advanced_testcase {
         }
     }
 
-
-    public function test_filter_replace_dataprovider() {
+    public static function filter_replace_dataprovider(): array {
         // Return [text, regex to match in output, match count, mediaplugincount, url, contextkey].
         // All <video> must have 2 surrounding divs, which matches the structure of video elements from other plugins.
         // This is then targeted in the node replacement for the filter.
@@ -480,7 +488,7 @@ final class filter_test extends advanced_testcase {
      * @param int $mediaplugincount
      * @param string $pageurl
      * @param string $contextkey
-     * @dataProvider test_filter_replace_dataprovider
+     * @dataProvider filter_replace_dataprovider
      */
     public function test_filter_replace($text, $regex, $matchcount, $mediaplugincount, $pageurl, $contextkey): void {
         global $PAGE;
@@ -498,7 +506,7 @@ final class filter_test extends advanced_testcase {
             $pageurl = str_replace(':cmid', $module->cmid, $pageurl);
         }
 
-        switch($contextkey) {
+        switch ($contextkey) {
             case 'system':
                 $PAGE->set_context(system::instance());
                 break;
