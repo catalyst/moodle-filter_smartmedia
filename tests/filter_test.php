@@ -307,8 +307,7 @@ final class filter_test extends advanced_testcase {
         // This is then targeted in the node replacement for the filter.
         // The mediaplugin count is how many divs with that class should be remaining after replacement of matching tags.
         return [
-            // Test <a>, Legit video link via dashboard url.
-            [
+            'Test <a>, Legit video link via dashboard url' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -316,8 +315,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a>, Legit video link via webservice url in system context.
-            [
+            'Test <a>, Legit video link via webservice url in system context' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -325,8 +323,7 @@ final class filter_test extends advanced_testcase {
                 '/lib/ajax/service.php',
                 'system',
             ],
-            // Test <a>, Legit video link via webservice url in course context.
-            [
+            'Test <a>, Legit video link via webservice url in course context.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -334,8 +331,7 @@ final class filter_test extends advanced_testcase {
                 '/lib/ajax/service.php',
                 'course',
             ],
-            // Test <a>, Legit video link via webservice url in module context.
-            [
+            'Test <a>, Legit video link via webservice url in module context.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -343,17 +339,7 @@ final class filter_test extends advanced_testcase {
                 '/lib/ajax/service.php',
                 'module',
             ],
-            // Test <a>, Legit video link via webservice url in course context.
-            [
-                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
-                '~<video~',
-                1,
-                1,
-                '/lib/ajax/service.php',
-                'course',
-            ],
-            // Test <a>, Legit video link via course url.
-            [
+            'Test <a>, Legit video link via course url.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -361,8 +347,7 @@ final class filter_test extends advanced_testcase {
                 '/course/view.php?id=:courseid',
                 'course',
             ],
-            // Test <a>, Legit video link via module url.
-            [
+            'Test <a>, Legit video link via module url.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
                 1,
@@ -370,8 +355,7 @@ final class filter_test extends advanced_testcase {
                 '/mod/forum/view.php?id=:cmid',
                 'module',
             ],
-            // Test <a>, Not supported extension.
-            [
+            'Test <a>, Not supported extension.' => [
                 html_writer::link('url.com/pluginfile.php/fake.wtf', 'My Fake Video'),
                 '~pluginfile\.php/fake\.wtf~',
                 1,
@@ -379,8 +363,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a>, Not a pluginfile.
-            [
+            'Test <a>, Not a pluginfile.' => [
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'My Fake Video'),
                 '~dodgypage\.php/fake\.mp4~',
                 1,
@@ -388,8 +371,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a>, 2 legit links.
-            [
+            'Test <a>, 2 legit links.' => [
                 '<div>' . html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'The Other Fake Video') . '</div>',
                 '~<video~',
@@ -398,8 +380,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a>, 1 legit, 1 not.
-            [
+            'Test <a>, 1 legit, 1 not.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 html_writer::link('url.com/dodgypage.php/fake.mp4', 'The Other Fake Video'),
                 '~<video~',
@@ -409,8 +390,7 @@ final class filter_test extends advanced_testcase {
                 'system',
 
             ],
-            // Test <video>, legit element.
-            [
+            'Test <video>, legit element.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*fakename\.mp4~',
                 1,
@@ -418,8 +398,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <video>, bad extension.
-            [
+            'Test <video>, bad extension.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.wtf"/></video></div></div>',
                 '~pluginfile\.php/fake\.wtf~',
                 1,
@@ -427,8 +406,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <video>, not a pluginfile.
-            [
+            'Test <video>, not a pluginfile.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~dodgypage\.php/fake\.mp4~',
                 1,
@@ -436,8 +414,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <video>, 2 legit elements.
-            [
+            'Test <video>, 2 legit elements.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4?~',
@@ -446,8 +423,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <video> then <a>, 2 legit elements.
-            [
+            'Test <video> then <a>, 2 legit elements.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~pluginfile\.php.*?fakename\.mp4?~',
@@ -456,8 +432,7 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a> then <video>, 2 legit elements.
-            [
+            'Test <a> then <video>, 2 legit elements.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
                 '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
@@ -466,14 +441,54 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
-            // Test <a> then <video>, 2 legit elements and one naughty.
-            [
-                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video') .
+            'Test <a> then <video>, 2 legit elements and one naughty.' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'my fake video') .
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>' .
                 '<div class="mediaplugin"><div><video><source src="url.com/dodgypage.php/fake.mp4"/></video></div></div>',
                 '~pluginfile\.php.*?fakename\.mp4~',
                 2,
                 3,
+                '/my/',
+                'system',
+            ],
+            '<a> with <img> child should be skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::img('url.com/image.jpg', 'fake image')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            '<a> with <p> text child is skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::tag('p', 'i am text')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            '<a> with text child is detected' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am just text'),
+                '~<video~',
+                1,
+                1,
+                '/my/',
+                'system',
+            ],
+            '<a> with both node and plain text children, that is it skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am plain text' . html_writer::tag('p', 'but i am node text')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            'two <a>, one with text child and one with node child, that only text child is replaced' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am just text') .
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::tag('p', 'i am node text')),
+                '~<video~',
+                1,
+                1,
                 '/my/',
                 'system',
             ],

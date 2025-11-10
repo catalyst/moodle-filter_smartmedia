@@ -654,6 +654,15 @@ class text_filter extends \core_filters\text_filter {
                 continue;
             }
 
+            // Check the link contains only plain-text.
+            // We want to avoid replacing links with children, e.g. images.
+            if (!empty($link->childNodes)) {
+                $elementchildren = array_filter(iterator_to_array($link->childNodes->getIterator()), fn($node) => $node->nodeType == XML_ELEMENT_NODE);
+                if (!empty($elementchildren)) {
+                    continue;
+                }
+            }
+
             // Perform the same data manipulations as above, using the href of the <a> as the target.
             $target = $link->getAttribute('href');
 
