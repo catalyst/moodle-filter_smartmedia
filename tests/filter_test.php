@@ -477,6 +477,47 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
+            '<a> with <img> child should be skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::img('url.com/image.jpg', 'fake image')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            '<a> with <p> text child is skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::tag('p', 'i am text')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            '<a> with text child is detected' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am just text'),
+                '~<video~',
+                1,
+                1,
+                '/my/',
+                'system',
+            ],
+            '<a> with both node and plain text children, that is it skipped' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am plain text' . html_writer::tag('p', 'but i am node text')),
+                '~<video~',
+                0,
+                0,
+                '/my/',
+                'system',
+            ],
+            'two <a>, one with text child and one with node child, that only text child is replaced' => [
+                html_writer::link('url.com/pluginfile.php/fake.mp4', 'i am just text') .
+                html_writer::link('url.com/pluginfile.php/fake.mp4', html_writer::tag('p', 'i am node text')),
+                '~<video~',
+                1,
+                1,
+                '/my/',
+                'system',
+            ],
         ];
     }
 
