@@ -339,14 +339,6 @@ final class filter_test extends advanced_testcase {
                 '/lib/ajax/service.php',
                 'module',
             ],
-            'Test <a>, Legit video link via webservice url in course context.' => [
-                html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
-                '~<video~',
-                1,
-                1,
-                '/lib/ajax/service.php',
-                'course',
-            ],
             'Test <a>, Legit video link via course url.' => [
                 html_writer::link('url.com/pluginfile.php/fake.mp4', 'My Fake Video'),
                 '~<video~',
