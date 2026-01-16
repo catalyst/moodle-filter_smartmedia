@@ -407,12 +407,12 @@ class text_filter extends \core_filters\text_filter {
                 if ($usesource && has_capability('filter/smartmedia:viewsource', $context)) {
                     // Return the original markup, along with a button to swap back to smartmedia.
                     $url->param('sm', $current);
-                    $button = new single_button(
+                    $button = html_writer::link(
                         $url,
                         get_string('viewoptimised', 'filter_smartmedia'),
-                        'get'
+                        ['class' => 'btn btn-secondary'],
                     );
-                    $button = html_writer::div($OUTPUT->render($button), 'local-smartmedia-view-optimised');
+                    $button = html_writer::div($button, 'local-smartmedia-view-optimised');
 
                     // Output the original source media and return.
                     if (!array_key_exists($current, $viewsource)) {
@@ -445,13 +445,14 @@ class text_filter extends \core_filters\text_filter {
             if (has_capability('filter/smartmedia:viewsource', $context)) {
                 // Add a button to view source.
                 $url->param('source', $current);
-                $button = new single_button(
+                $button = html_writer::link(
                     $url,
                     get_string('viewsource', 'filter_smartmedia'),
-                    'get'
+                    ['class' => 'btn btn-secondary'],
                 );
+                $button = html_writer::div($button, 'local-smartmedia-view-source');
                 // Wrap just smartmedia content inside a wrapper div for styling targeting.
-                $replacedlink = html_writer::div($replacedlink . $OUTPUT->render($button), 'local-smartmedia-wrapper');
+                $replacedlink = html_writer::div($replacedlink . $button, 'local-smartmedia-wrapper');
             } else {
                 $replacedlink = html_writer::div($replacedlink, 'local-smartmedia-wrapper');
             }
