@@ -580,7 +580,7 @@ final class filter_test extends advanced_testcase {
         $this->resetDebugging();
         $text = '<div><div><video><source src="url.com/pluginfile.php/fake.mp4"/></video></div></div>';
         $result = $filterplugin->filter($text);
-        $this->assertMatchesRegularExpression('/<button.*View source media.*<\/button>/', $result);
+        $this->assertMatchesRegularExpression('/<a.*View source media.*<\/a>/', $result);
     }
 
     public function test_view_optimised(): void {
@@ -605,6 +605,6 @@ final class filter_test extends advanced_testcase {
         $filterplugin = new text_filter(null, [], $conversion);
         $this->resetDebugging();
         $result = $filterplugin->filter($text);
-        $this->assertMatchesRegularExpression('/<button.*View optimised media.*<\/button>/', $result);
+        $this->assertMatchesRegularExpression('/<a.*View optimised media.*<\/a>/', $result);
     }
 }
