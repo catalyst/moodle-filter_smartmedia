@@ -398,6 +398,14 @@ final class filter_test extends advanced_testcase {
                 '/my/',
                 'system',
             ],
+            'Test <video>, direct src embed in section zero via course URL.' => [
+                '<div class="mediaplugin"><div><video src="url.com/pluginfile.php/fake.mp4?forcedownload=1"></video></div></div>',
+                '~pluginfile\.php.*fakename\.mp4~',
+                1,
+                1,
+                '/course/view.php?id=:courseid&section=0',
+                'course',
+            ],
             'Test <video>, bad extension.' => [
                 '<div class="mediaplugin"><div><video><source src="url.com/pluginfile.php/fake.wtf"/></video></div></div>',
                 '~pluginfile\.php/fake\.wtf~',

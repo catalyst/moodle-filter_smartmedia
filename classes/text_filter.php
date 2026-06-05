@@ -202,6 +202,22 @@ class text_filter extends \core_filters\text_filter {
     }
 
     /**
+     * Extract a lowercase file extension from a media target URL/path.
+     *
+     * @param string $target Link or source URL.
+     * @return string
+     */
+    private function get_target_extension(string $target): string {
+        $path = parse_url($target, PHP_URL_PATH);
+
+        if ($path === null || $path === false) {
+            $path = $target;
+        }
+
+        return strtolower(pathinfo(urldecode($path), PATHINFO_EXTENSION));
+    }
+
+    /**
      * Given a href to a media file get the corresponding
      * smart media elements.
      *
@@ -580,15 +596,19 @@ class text_filter extends \core_filters\text_filter {
         foreach ($videos as $video) {
             // Get the source and use the target to get the smartmedia for the file.
             $source = $video->getElementsByTagName('source');
-            // If there are no sources, can we replace? Not currently.
-            if (count($source) === 0) {
+            if (count($source) > 0) {
+                $target = $source[0]->getAttribute('src');
+            } else {
+                // Support direct editor embeds that use <video src="..."> without child <source> tags.
+                $target = $video->getAttribute('src');
+            }
+
+            if (empty($target)) {
                 continue;
             }
-            $target = $source[0]->getAttribute('src');
 
             // Check if the target media type is compatible.
-            $components = explode('/', $target);
-            $ext = strtolower(pathinfo(end($components), PATHINFO_EXTENSION));
+            $ext = $this->get_target_extension($target);
             if (
                 stripos($target, 'pluginfile.php') === false ||
                 !in_array($ext, $this->mediatypes)
@@ -668,8 +688,7 @@ class text_filter extends \core_filters\text_filter {
             $target = $link->getAttribute('href');
 
             // Check if the target media type is compatible.
-            $components = explode('/', $target);
-            $ext = pathinfo(end($components), PATHINFO_EXTENSION);
+            $ext = $this->get_target_extension($target);
             if (stripos($target, 'pluginfile.php') === false || !in_array($ext, $this->mediatypes)) {
                 continue;
             }
