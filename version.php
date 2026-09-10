@@ -25,9 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'filter_smartmedia';
-$plugin->release = 2025101700;
-$plugin->version = 2025101700;
-$plugin->supported = [405, 405];
+$plugin->release = 2025101701;
+$plugin->version = 2025101701;
+$plugin->supported = [405, 503];
 $plugin->requires = 2024100700; // 4.5
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [

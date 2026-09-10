@@ -6,6 +6,8 @@ on: [push, pull_request]
 jobs:
   ci:
     uses: catalyst/catalyst-moodle-workflows/.github/workflows/ci.yml@main
+    secrets: inherit
     with:
       extra_plugin_runners: 'moodle-plugin-ci add-plugin --branch MOODLE_405_STABLE catalyst/moodle-local_smartmedia'
+      enable_composer_publish: true
       disable_phpcpd: true
